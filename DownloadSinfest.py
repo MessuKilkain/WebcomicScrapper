@@ -13,7 +13,7 @@ import datetime
 imageFilesDestinationFolder = 'Sinfest'
 pageCountLimit = 1000
 
-firstCommicUrl = 'http://www.sinfest.net/view.php?date=2016-11-01'
+firstCommicUrl = 'http://www.sinfest.net/view.php?date=2017-01-01'
 
 def is_integer(s):
 	try:

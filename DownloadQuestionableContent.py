@@ -14,7 +14,7 @@ imageFilesDestinationFolder = 'QuestionableContent'
 pageCountLimit = 10000
 
 #firstCommicUrl = 'http://www.questionablecontent.net/view.php?comic=1'
-firstCommicUrl = 'http://www.questionablecontent.net/view.php?comic=3350'
+firstCommicUrl = 'http://www.questionablecontent.net/view.php?comic=3400'
 
 def is_integer(s):
 	try:

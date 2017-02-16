@@ -14,7 +14,7 @@ import datetime
 imageFilesDestinationFolder = 'I_Don_t_Want_This_Kind_of_Hero_-_Manga'
 pageCountLimit = 1000
 
-firstCommicUrl = 'http://mangafox.me/manga/i_don_t_want_this_kind_of_hero/c137/1.html'
+firstCommicUrl = 'http://mangafox.me/manga/i_don_t_want_this_kind_of_hero/c142/1.html'
 
 def is_integer(s):
 	try:
