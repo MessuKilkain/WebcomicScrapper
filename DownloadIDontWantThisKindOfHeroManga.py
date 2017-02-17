@@ -17,13 +17,14 @@ pageCountLimit = 1000
 firstCommicUrl = 'http://mangafox.me/manga/i_don_t_want_this_kind_of_hero/c142/1.html'
 
 class WebcomicScrapper_IDontWantThisKindOfHero(object):
-
+	
 	@property
 	def validCharsForFolderName(self):
+		"""List of characters accepted for folder name."""
 		if !self._validCharsForFolderName
 			self._validCharsForFolderName = "-_.()%s%s" % (string.ascii_letters, string.digits)
 		return self._validCharsForFolderName
-		
+	
 	@property
 	def startComicUrl(self):
 		return self._startComicUrl
@@ -33,6 +34,28 @@ class WebcomicScrapper_IDontWantThisKindOfHero(object):
 			raise ValueError("startComicUrl is expected to be a string")
 		else
 			self._startComicUrl = value
+		return
+	
+	@property
+	def imageFilesDestinationFolder(self):
+		return self._imageFilesDestinationFolder
+	@imageFilesDestinationFolder.setter
+	def imageFilesDestinationFolder(self,value):
+		if !isinstance(value, str)
+			raise ValueError("imageFilesDestinationFolder is expected to be a string")
+		else
+			self._imageFilesDestinationFolder = self.cleanStringForFolderName(value)
+		return
+	
+	@property
+	def pageCountLimit(self):
+		return self._pageCountLimit
+	@pageCountLimit.setter
+	def pageCountLimit(self,value):
+		if !isinstance(value, int) or value < -1 or value == 0:
+			raise ValueError("pageCountLimit is expected to be a positive int or -1 for no limit")
+		else
+			self._pageCountLimit = value
 		return
 	
 	def is_integer(s):
@@ -60,12 +83,12 @@ class WebcomicScrapper_IDontWantThisKindOfHero(object):
 				temp += '_'
 		return temp
 
-	def start(self):
+	def start(self, shouldPauseAtEnd):
 		self.print_FileAndSysout("\nStar scrapping :",str(datetime.datetime.now()),'\n')
 
-		nextUrl = firstCommicUrl
+		nextUrl = self.startComicUrl
 		pageCount = 0
-		while pageCount < pageCountLimit and nextUrl:
+		while ( self.pageCountLimit == -1 or pageCount < self.pageCountLimit) and nextUrl:
 			self.print_FileAndSysout('#'+str(pageCount),'Next Url :',nextUrl)
 			r = requests.get(nextUrl)
 			if r.status_code == 200 :
@@ -110,7 +133,7 @@ class WebcomicScrapper_IDontWantThisKindOfHero(object):
 				else:
 					imageFileName = '%(chapter)s_-_%(number)03d%(ext)s' % {"chapter": chapterNumber, "number": int(imageNumber), 'ext': imgSrcExtension}
 					imageFileName = self.cleanStringForFolderName( imageFileName )
-					imageFileName = os.path.join(imageFilesDestinationFolder,imageFileName)
+					imageFileName = os.path.join(self.imageFilesDestinationFolder,imageFileName)
 					# self.print_FileAndSysout(imageFileName)
 					if os.path.isfile( imageFileName ):
 						self.print_FileAndSysout('\tFile '+imageFileName+' already exists.')
@@ -156,8 +179,9 @@ class WebcomicScrapper_IDontWantThisKindOfHero(object):
 					pageCount += 1
 
 		self.print_FileAndSysout('Page Count :',pageCount)
-
-		os.system("pause")
+		
+		if shouldPauseAtEnd:
+			os.system("pause")
 		
 		return pageCount
 
