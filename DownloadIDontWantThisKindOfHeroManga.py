@@ -70,6 +70,15 @@ class WebcomicScrapper_IDontWantThisKindOfHero(object):
 		if __file__:
 			with open(os.path.basename(__file__)+'.log', 'a') as f:
 				print(*objects, file=f)
+	def logInfo(*objects, end='\n'):
+		print_FileAndSysout(objects, end)
+		return
+	def logWarn(*objects, end='\n'):
+		print_FileAndSysout(objects, end)
+		return
+	def logDebug(*objects, end='\n'):
+		# print_FileAndSysout(objects, end)
+		return
 	
 	def cleanStringForFolderName(stringToClean):
 		if !isinstance(stringToClean, str)
@@ -84,12 +93,12 @@ class WebcomicScrapper_IDontWantThisKindOfHero(object):
 		return temp
 
 	def start(self, shouldPauseAtEnd):
-		self.print_FileAndSysout("\nStar scrapping :",str(datetime.datetime.now()),'\n')
+		self.logInfo("\nStar scrapping :",str(datetime.datetime.now()),'\n')
 
 		nextUrl = self.startComicUrl
 		pageCount = 0
 		while ( self.pageCountLimit == -1 or pageCount < self.pageCountLimit) and nextUrl:
-			self.print_FileAndSysout('#'+str(pageCount),'Next Url :',nextUrl)
+			self.logInfo('#'+str(pageCount),'Next Url :',nextUrl)
 			r = requests.get(nextUrl)
 			if r.status_code == 200 :
 				soup = BeautifulSoup(r.text,'html.parser')
@@ -99,7 +108,7 @@ class WebcomicScrapper_IDontWantThisKindOfHero(object):
 				imageNumber = ''
 				lastPageForCurrentChapter = ''
 				imgArray = soup.select('#viewer img#image')
-				# self.print_FileAndSysout('imgArray :',imgArray)
+				self.logDebug('imgArray :',imgArray)
 				if imgArray and len(imgArray) > 0 :
 					img = imgArray[0]
 					imgSrc = img['src']
@@ -111,50 +120,50 @@ class WebcomicScrapper_IDontWantThisKindOfHero(object):
 							if underscoreIndex != -1:
 								imgSrcExtension = imgSrcExtension[:underscoreIndex]
 						imgSrc = urllib.parse.urljoin(r.url,imgSrc)
-					# self.print_FileAndSysout( imgSrc, imgSrcExtension )
+					self.logDebug( imgSrc, imgSrcExtension )
 				urlParsed = urllib.parse.urlparse(r.url)
 				if urlParsed and urlParsed.path:
-					# self.print_FileAndSysout(urlParsed,urlParsed.path)
+					self.logDebug(urlParsed,urlParsed.path)
 					(pathBeforePage,pageFileName) = os.path.split(urlParsed.path)
 					if pageFileName:
 						(imageNumber,tmpExtention) = os.path.splitext(pageFileName)
-						# self.print_FileAndSysout( 'imageNumber :', imageNumber )
+						self.logDebug( 'imageNumber :', imageNumber )
 					if pathBeforePage :
 						(nothingImportant,chapterNumber) = os.path.split(pathBeforePage)
-						# self.print_FileAndSysout( 'chapterNumber :', chapterNumber )
+						self.logDebug( 'chapterNumber :', chapterNumber )
 				if not imgSrc:
-					self.print_FileAndSysout('imgSrc is incorrect')
+					self.logWarn('imgSrc is incorrect')
 				elif not imageNumber or not is_integer(imageNumber) :
-					self.print_FileAndSysout('imageNumber is incorrect')
+					self.logWarn('imageNumber is incorrect')
 				elif not chapterNumber:
-					self.print_FileAndSysout('chapterNumber is incorrect')
+					self.logWarn('chapterNumber is incorrect')
 				elif not imgSrcExtension:
-					self.print_FileAndSysout('imgSrcExtension is incorrect')
+					self.logWarn('imgSrcExtension is incorrect')
 				else:
 					imageFileName = '%(chapter)s_-_%(number)03d%(ext)s' % {"chapter": chapterNumber, "number": int(imageNumber), 'ext': imgSrcExtension}
 					imageFileName = self.cleanStringForFolderName( imageFileName )
 					imageFileName = os.path.join(self.imageFilesDestinationFolder,imageFileName)
-					# self.print_FileAndSysout(imageFileName)
+					self.logDebug(imageFileName)
 					if os.path.isfile( imageFileName ):
-						self.print_FileAndSysout('\tFile '+imageFileName+' already exists.')
+						self.logInfo('\tFile '+imageFileName+' already exists.')
 					else:
 						imageRequest = requests.get(imgSrc)
 						if imageRequest.status_code != 200:
-							self.print_FileAndSysout('\tImage request failed :',r)
+							self.logWarn('\tImage request failed :',r)
 						else:
 							with open(imageFileName, 'wb') as f:
 								f.write(imageRequest.content)
-								self.print_FileAndSysout('\tImage saved as '+imageFileName)
+								self.logInfo('\tImage saved as '+imageFileName)
 				
 				pagesArray = soup.select('form#top_bar div.r.m div select.m option')
-				# self.print_FileAndSysout('pagesArray :',pagesArray)
+				self.logDebug('pagesArray :',pagesArray)
 				if pagesArray and len(pagesArray) > 0 :
 					pagesArray.sort(key=lambda option: int(option['value']))
-					# self.print_FileAndSysout('pagesArray sorted :',pagesArray)
+					self.logDebug('pagesArray sorted :',pagesArray)
 					lastPageForChapterOption = pagesArray[len(pagesArray)-1]
 					if lastPageForChapterOption and lastPageForChapterOption['value'] :
 						lastPageForCurrentChapter = lastPageForChapterOption['value']
-						# self.print_FileAndSysout( 'lastPageForCurrentChapter :',lastPageForCurrentChapter )
+						self.logDebug( 'lastPageForCurrentChapter :',lastPageForCurrentChapter )
 				
 				nextUrl = ''
 				if imageNumber and is_integer(imageNumber) and lastPageForCurrentChapter and is_integer(lastPageForCurrentChapter) :
@@ -166,7 +175,7 @@ class WebcomicScrapper_IDontWantThisKindOfHero(object):
 								nextUrl = nextChapterSpanLabel.parent.a['href']
 					else:
 						nextUrlArray = soup.select('#top_center_bar a.btn.next_page')
-						# self.print_FileAndSysout('nextUrlArray :',nextUrlArray)
+						self.logDebug('nextUrlArray :',nextUrlArray)
 						if nextUrlArray and len(nextUrlArray) > 0 :
 							nextUrlA = nextUrlArray[0]
 							if nextUrlA and nextUrlA['href']:
@@ -178,7 +187,7 @@ class WebcomicScrapper_IDontWantThisKindOfHero(object):
 				if nextUrl:
 					pageCount += 1
 
-		self.print_FileAndSysout('Page Count :',pageCount)
+		self.logInfo('Page Count :',pageCount)
 		
 		if shouldPauseAtEnd:
 			os.system("pause")
