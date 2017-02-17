@@ -75,13 +75,13 @@ class WebcomicScrapper_IDontWantThisKindOfHero(object):
 			with open(os.path.basename(__file__)+'.log', 'a') as f:
 				print(*objects, file=f)
 	def logInfo(self,*objects, end='\n'):
-		self.print_FileAndSysout(objects, end)
+		self.print_FileAndSysout(*objects, end)
 		return
 	def logWarn(self,*objects, end='\n'):
-		self.print_FileAndSysout(objects, end)
+		self.print_FileAndSysout(*objects, end)
 		return
 	def logDebug(self,*objects, end='\n'):
-		# self.print_FileAndSysout(objects, end)
+		# self.print_FileAndSysout(*objects, end)
 		return
 	
 	def cleanStringForFolderName(self,stringToClean):
