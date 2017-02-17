@@ -21,7 +21,7 @@ class WebcomicScrapper_IDontWantThisKindOfHero(object):
 	@property
 	def validCharsForFolderName(self):
 		"""List of characters accepted for folder name."""
-		if !self._validCharsForFolderName
+		if not self._validCharsForFolderName:
 			self._validCharsForFolderName = "-_.()%s%s" % (string.ascii_letters, string.digits)
 		return self._validCharsForFolderName
 	
@@ -30,9 +30,9 @@ class WebcomicScrapper_IDontWantThisKindOfHero(object):
 		return self._startComicUrl
 	@startComicUrl.setter
 	def startComicUrl(self,value):
-		if !isinstance(value, str)
+		if not isinstance(value, str):
 			raise ValueError("startComicUrl is expected to be a string")
-		else
+		else:
 			self._startComicUrl = value
 		return
 	
@@ -41,9 +41,9 @@ class WebcomicScrapper_IDontWantThisKindOfHero(object):
 		return self._imageFilesDestinationFolder
 	@imageFilesDestinationFolder.setter
 	def imageFilesDestinationFolder(self,value):
-		if !isinstance(value, str)
+		if not isinstance(value, str):
 			raise ValueError("imageFilesDestinationFolder is expected to be a string")
-		else
+		else:
 			self._imageFilesDestinationFolder = self.cleanStringForFolderName(value)
 		return
 	
@@ -52,9 +52,9 @@ class WebcomicScrapper_IDontWantThisKindOfHero(object):
 		return self._pageCountLimit
 	@pageCountLimit.setter
 	def pageCountLimit(self,value):
-		if !isinstance(value, int) or value < -1 or value == 0:
+		if ( not isinstance(value, int) ) or value < -1 or value == 0:
 			raise ValueError("pageCountLimit is expected to be a positive int or -1 for no limit")
-		else
+		else:
 			self._pageCountLimit = value
 		return
 	
@@ -81,7 +81,7 @@ class WebcomicScrapper_IDontWantThisKindOfHero(object):
 		return
 	
 	def cleanStringForFolderName(stringToClean):
-		if !isinstance(stringToClean, str)
+		if not isinstance(stringToClean, str):
 			raise ValueError("stringToClean is expected to be a string")
 			return
 		temp = ''
@@ -92,7 +92,7 @@ class WebcomicScrapper_IDontWantThisKindOfHero(object):
 				temp += '_'
 		return temp
 
-	def start(self, shouldPauseAtEnd):
+	def start(self, shouldPauseAtEnd=True):
 		self.logInfo("\nStar scrapping :",str(datetime.datetime.now()),'\n')
 
 		nextUrl = self.startComicUrl
@@ -194,12 +194,14 @@ class WebcomicScrapper_IDontWantThisKindOfHero(object):
 		
 		return pageCount
 
+# Start scrapping webcomic
+scrapper = WebcomicScrapper_IDontWantThisKindOfHero()
 
+scrapper.startComicUrl = firstCommicUrl
+scrapper.pageCountLimit = pageCountLimit
+scrapper.imageFilesDestinationFolder = imageFilesDestinationFolder
 
-
-
-
-
+scrapper.start(True)
 
 
 
