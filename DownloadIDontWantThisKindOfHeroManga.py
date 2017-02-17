@@ -17,12 +17,16 @@ pageCountLimit = 1000
 firstCommicUrl = 'http://mangafox.me/manga/i_don_t_want_this_kind_of_hero/c142/1.html'
 
 class WebcomicScrapper_IDontWantThisKindOfHero(object):
-	
+
+	def __init__(self):
+		self._validCharsForFolderName = "-_.()%s%s" % (string.ascii_letters, string.digits)
+		self._startComicUrl = ''
+		self._imageFilesDestinationFolder = ''
+		self._pageCountLimit = 1
+
 	@property
 	def validCharsForFolderName(self):
 		"""List of characters accepted for folder name."""
-		if not self._validCharsForFolderName:
-			self._validCharsForFolderName = "-_.()%s%s" % (string.ascii_letters, string.digits)
 		return self._validCharsForFolderName
 	
 	@property
@@ -58,29 +62,29 @@ class WebcomicScrapper_IDontWantThisKindOfHero(object):
 			self._pageCountLimit = value
 		return
 	
-	def is_integer(s):
+	def is_integer(self,s):
 		try:
 			int(s)
 			return True
 		except ValueError:
 			return False
 
-	def print_FileAndSysout(*objects, end='\n'):
+	def print_FileAndSysout(self,*objects, end='\n'):
 		print(*objects)
 		if __file__:
 			with open(os.path.basename(__file__)+'.log', 'a') as f:
 				print(*objects, file=f)
-	def logInfo(*objects, end='\n'):
-		print_FileAndSysout(objects, end)
+	def logInfo(self,*objects, end='\n'):
+		self.print_FileAndSysout(objects, end)
 		return
-	def logWarn(*objects, end='\n'):
-		print_FileAndSysout(objects, end)
+	def logWarn(self,*objects, end='\n'):
+		self.print_FileAndSysout(objects, end)
 		return
-	def logDebug(*objects, end='\n'):
-		# print_FileAndSysout(objects, end)
+	def logDebug(self,*objects, end='\n'):
+		# self.print_FileAndSysout(objects, end)
 		return
 	
-	def cleanStringForFolderName(stringToClean):
+	def cleanStringForFolderName(self,stringToClean):
 		if not isinstance(stringToClean, str):
 			raise ValueError("stringToClean is expected to be a string")
 			return
@@ -133,7 +137,7 @@ class WebcomicScrapper_IDontWantThisKindOfHero(object):
 						self.logDebug( 'chapterNumber :', chapterNumber )
 				if not imgSrc:
 					self.logWarn('imgSrc is incorrect')
-				elif not imageNumber or not is_integer(imageNumber) :
+				elif not imageNumber or not self.is_integer(imageNumber) :
 					self.logWarn('imageNumber is incorrect')
 				elif not chapterNumber:
 					self.logWarn('chapterNumber is incorrect')
@@ -166,7 +170,7 @@ class WebcomicScrapper_IDontWantThisKindOfHero(object):
 						self.logDebug( 'lastPageForCurrentChapter :',lastPageForCurrentChapter )
 				
 				nextUrl = ''
-				if imageNumber and is_integer(imageNumber) and lastPageForCurrentChapter and is_integer(lastPageForCurrentChapter) :
+				if imageNumber and self.is_integer(imageNumber) and lastPageForCurrentChapter and self.is_integer(lastPageForCurrentChapter) :
 					if lastPageForCurrentChapter == imageNumber :
 						chapterNavigationDiv = soup.find('div',id='chnav')
 						if chapterNavigationDiv:
