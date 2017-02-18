@@ -3,6 +3,7 @@
 """
 import os.path
 import urllib.parse
+from datetime import datetime
 
 from WebcomicScrapper import WebcomicScrapper
 
@@ -39,14 +40,14 @@ class WebcomicScrapper_GoGetARoomie(WebcomicScrapper):
 		
 		#imgDate fallback
 		if not imgDate:
-			# TODO : imrpove by recomposing the date
 			fallbackDate = soup.select_one('.cc-publishtime')
 			self.logDebug("fallbackDate : ",str(fallbackDate))
 			self.logDebug("fallbackDate.get_text() : ",str(fallbackDate.get_text()))
 			if fallbackDate and fallbackDate.get_text():
 				fallbackDateParts = fallbackDate.get_text().split()
 				if fallbackDateParts and len(fallbackDateParts) > 1:
-					imgDate = '-'.join( fallbackDateParts[1].split('.') )
+					#imgDate = '-'.join( fallbackDateParts[1].split('.') )
+					imgDate = datetime.strptime( fallbackDateParts[1], '%b.%d.%y' ).strftime('%Y-%m-%d')
 		
 		if not imgSrcExtension:
 			self.logWarn('imgSrcExtension is incorrect')
