@@ -116,6 +116,8 @@ class WebcomicScrapper(object):
 
 	def start(self, shouldPauseAtEnd=True):
 		self.logInfo("\nStar scrapping :",str(datetime.datetime.now()),'\n')
+		
+		# TODO : improve by creating the destination folder if it does not exist
 
 		nextUrl = self.startComicUrl
 		pageCount = 0
