@@ -77,8 +77,9 @@ class WebcomicScrapper_GoGetARoomie(WebcomicScrapper):
 # Start scrapping webcomic
 scrapper = WebcomicScrapper_GoGetARoomie()
 
-# scrapper.startComicUrl = 'http://www.gogetaroomie.com/comic/enough-kids-to-go-around'
+scrapper.startComicUrl = 'http://www.gogetaroomie.com/comic/enough-kids-to-go-around'
 scrapper.pageCountLimit = 1000
+# scrapper.interRequestWaitingTime = 0;
 scrapper.logFileName = os.path.basename(__file__)+'.log'
 
 scrapper.start(True)
