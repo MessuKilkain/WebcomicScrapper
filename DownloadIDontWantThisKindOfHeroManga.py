@@ -106,48 +106,14 @@ class WebcomicScrapper_IDontWantThisKindOfHero(object):
 			r = requests.get(nextUrl)
 			if r.status_code == 200 :
 				soup = BeautifulSoup(r.text,'html.parser')
-				imgSrc = ''
-				imgSrcExtension = ''
-				chapterNumber = ''
-				imageNumber = ''
-				lastPageForCurrentChapter = ''
-				imgArray = soup.select('#viewer img#image')
-				self.logDebug('imgArray :',imgArray)
-				if imgArray and len(imgArray) > 0 :
-					img = imgArray[0]
-					imgSrc = img['src']
-					if imgSrc:
-						imgSrcPath = imgSrc = urllib.parse.urlparse(imgSrc).path
-						(tmpImgSrcRoot,imgSrcExtension) = os.path.splitext(imgSrcPath)
-						if imgSrcExtension:
-							underscoreIndex = imgSrcExtension.find('_')
-							if underscoreIndex != -1:
-								imgSrcExtension = imgSrcExtension[:underscoreIndex]
-						imgSrc = urllib.parse.urljoin(r.url,imgSrc)
-					self.logDebug( imgSrc, imgSrcExtension )
-				urlParsed = urllib.parse.urlparse(r.url)
-				if urlParsed and urlParsed.path:
-					self.logDebug(urlParsed,urlParsed.path)
-					(pathBeforePage,pageFileName) = os.path.split(urlParsed.path)
-					if pageFileName:
-						(imageNumber,tmpExtention) = os.path.splitext(pageFileName)
-						self.logDebug( 'imageNumber :', imageNumber )
-					if pathBeforePage :
-						(nothingImportant,chapterNumber) = os.path.split(pathBeforePage)
-						self.logDebug( 'chapterNumber :', chapterNumber )
+				
+				(nextUrl,imageFileName,imgSrc) = self.getValuesFromPage( soup, r )
+				
 				if not imgSrc:
 					self.logWarn('imgSrc is incorrect')
-				elif not imageNumber or not self.is_integer(imageNumber) :
-					self.logWarn('imageNumber is incorrect')
-				elif not chapterNumber:
-					self.logWarn('chapterNumber is incorrect')
-				elif not imgSrcExtension:
-					self.logWarn('imgSrcExtension is incorrect')
+				elif not imageFileName :
+					self.logWarn('imageFileName is incorrect')
 				else:
-					imageFileName = '%(chapter)s_-_%(number)03d%(ext)s' % {"chapter": chapterNumber, "number": int(imageNumber), 'ext': imgSrcExtension}
-					imageFileName = self.cleanStringForFolderName( imageFileName )
-					imageFileName = os.path.join(self.imageFilesDestinationFolder,imageFileName)
-					self.logDebug(imageFileName)
 					if os.path.isfile( imageFileName ):
 						self.logInfo('\tFile '+imageFileName+' already exists.')
 					else:
@@ -159,31 +125,6 @@ class WebcomicScrapper_IDontWantThisKindOfHero(object):
 								f.write(imageRequest.content)
 								self.logInfo('\tImage saved as '+imageFileName)
 				
-				pagesArray = soup.select('form#top_bar div.r.m div select.m option')
-				self.logDebug('pagesArray :',pagesArray)
-				if pagesArray and len(pagesArray) > 0 :
-					pagesArray.sort(key=lambda option: int(option['value']))
-					self.logDebug('pagesArray sorted :',pagesArray)
-					lastPageForChapterOption = pagesArray[len(pagesArray)-1]
-					if lastPageForChapterOption and lastPageForChapterOption['value'] :
-						lastPageForCurrentChapter = lastPageForChapterOption['value']
-						self.logDebug( 'lastPageForCurrentChapter :',lastPageForCurrentChapter )
-				
-				nextUrl = ''
-				if imageNumber and self.is_integer(imageNumber) and lastPageForCurrentChapter and self.is_integer(lastPageForCurrentChapter) :
-					if lastPageForCurrentChapter == imageNumber :
-						chapterNavigationDiv = soup.find('div',id='chnav')
-						if chapterNavigationDiv:
-							nextChapterSpanLabel = chapterNavigationDiv.find('span',string=re.compile('^Next.*'))
-							if nextChapterSpanLabel and nextChapterSpanLabel.parent and nextChapterSpanLabel.parent.a and nextChapterSpanLabel.parent.a['href'] :
-								nextUrl = nextChapterSpanLabel.parent.a['href']
-					else:
-						nextUrlArray = soup.select('#top_center_bar a.btn.next_page')
-						self.logDebug('nextUrlArray :',nextUrlArray)
-						if nextUrlArray and len(nextUrlArray) > 0 :
-							nextUrlA = nextUrlArray[0]
-							if nextUrlA and nextUrlA['href']:
-								nextUrl = urllib.parse.urljoin(r.url,nextUrlA['href'])
 				if nextUrl :
 					urlParsed = urllib.parse.urlparse(nextUrl)
 					if not( urlParsed.scheme and urlParsed.netloc and urlParsed.path ):
@@ -197,6 +138,78 @@ class WebcomicScrapper_IDontWantThisKindOfHero(object):
 			os.system("pause")
 		
 		return pageCount
+	
+	# return (nextUrl,imageFileName,imgSrc)
+	def getValuesFromPage(self,soup,request):
+		imgSrc = ''
+		imageFileName = ''
+		nextUrl = ''
+		
+		imgSrcExtension = ''
+		chapterNumber = ''
+		imageNumber = ''
+		lastPageForCurrentChapter = ''
+		imgArray = soup.select('#viewer img#image')
+		self.logDebug('imgArray :',imgArray)
+		if imgArray and len(imgArray) > 0 :
+			img = imgArray[0]
+			imgSrc = img['src']
+			if imgSrc:
+				imgSrcPath = imgSrc = urllib.parse.urlparse(imgSrc).path
+				(tmpImgSrcRoot,imgSrcExtension) = os.path.splitext(imgSrcPath)
+				if imgSrcExtension:
+					underscoreIndex = imgSrcExtension.find('_')
+					if underscoreIndex != -1:
+						imgSrcExtension = imgSrcExtension[:underscoreIndex]
+				imgSrc = urllib.parse.urljoin(request.url,imgSrc)
+			self.logDebug( imgSrc, imgSrcExtension )
+		urlParsed = urllib.parse.urlparse(request.url)
+		if urlParsed and urlParsed.path:
+			self.logDebug(urlParsed,urlParsed.path)
+			(pathBeforePage,pageFileName) = os.path.split(urlParsed.path)
+			if pageFileName:
+				(imageNumber,tmpExtention) = os.path.splitext(pageFileName)
+				self.logDebug( 'imageNumber :', imageNumber )
+			if pathBeforePage :
+				(nothingImportant,chapterNumber) = os.path.split(pathBeforePage)
+				self.logDebug( 'chapterNumber :', chapterNumber )
+		if not imageNumber or not self.is_integer(imageNumber) :
+			self.logWarn('imageNumber is incorrect')
+		elif not chapterNumber:
+			self.logWarn('chapterNumber is incorrect')
+		elif not imgSrcExtension:
+			self.logWarn('imgSrcExtension is incorrect')
+		else:
+			imageFileName = '%(chapter)s_-_%(number)03d%(ext)s' % {"chapter": chapterNumber, "number": int(imageNumber), 'ext': imgSrcExtension}
+			imageFileName = self.cleanStringForFolderName( imageFileName )
+			imageFileName = os.path.join(self.imageFilesDestinationFolder,imageFileName)
+			self.logDebug( 'imageFileName :', imageFileName)
+		
+		pagesArray = soup.select('form#top_bar div.r.m div select.m option')
+		self.logDebug('pagesArray :',pagesArray)
+		if pagesArray and len(pagesArray) > 0 :
+			pagesArray.sort(key=lambda option: int(option['value']))
+			self.logDebug('pagesArray sorted :',pagesArray)
+			lastPageForChapterOption = pagesArray[len(pagesArray)-1]
+			if lastPageForChapterOption and lastPageForChapterOption['value'] :
+				lastPageForCurrentChapter = lastPageForChapterOption['value']
+				self.logDebug( 'lastPageForCurrentChapter :',lastPageForCurrentChapter )
+		# Get NextUrl
+		if imageNumber and self.is_integer(imageNumber) and lastPageForCurrentChapter and self.is_integer(lastPageForCurrentChapter) :
+			if lastPageForCurrentChapter == imageNumber :
+				chapterNavigationDiv = soup.find('div',id='chnav')
+				if chapterNavigationDiv:
+					nextChapterSpanLabel = chapterNavigationDiv.find('span',string=re.compile('^Next.*'))
+					if nextChapterSpanLabel and nextChapterSpanLabel.parent and nextChapterSpanLabel.parent.a and nextChapterSpanLabel.parent.a['href'] :
+						nextUrl = nextChapterSpanLabel.parent.a['href']
+			else:
+				nextUrlArray = soup.select('#top_center_bar a.btn.next_page')
+				self.logDebug('nextUrlArray :',nextUrlArray)
+				if nextUrlArray and len(nextUrlArray) > 0 :
+					nextUrlA = nextUrlArray[0]
+					if nextUrlA and nextUrlA['href']:
+						nextUrl = urllib.parse.urljoin(request.url,nextUrlA['href'])
+		return (nextUrl,imageFileName,imgSrc)
 
 # Start scrapping webcomic
 scrapper = WebcomicScrapper_IDontWantThisKindOfHero()
