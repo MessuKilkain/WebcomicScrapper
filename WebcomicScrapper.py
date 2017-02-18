@@ -135,8 +135,10 @@ class WebcomicScrapper(object):
 				
 				if not imgSrc:
 					self.logWarn('imgSrc is incorrect')
+					imagesFailuresUrls.append(r.url)
 				elif not imageFileName :
 					self.logWarn('imageFileName is incorrect')
+					imagesFailuresUrls.append(r.url)
 				else:
 					if os.path.isfile( imageFileName ):
 						self.logInfo('\tFile '+imageFileName+' already exists.')
