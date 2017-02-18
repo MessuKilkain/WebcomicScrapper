@@ -116,7 +116,7 @@ class WebcomicScrapper(object):
 
 	def start(self, shouldPauseAtEnd=True):
 		self.logInfo("\nStar scrapping :",str(datetime.datetime.now()),'\n')
-		
+		imagesFailuresUrls = []
 		# TODO : improve by creating the destination folder if it does not exist
 
 		nextUrl = self.startComicUrl
@@ -141,6 +141,7 @@ class WebcomicScrapper(object):
 						imageRequest = requests.get(imgSrc)
 						if imageRequest.status_code != 200:
 							self.logWarn('\tImage request failed :',r)
+							imagesFailuresUrls.append(r.url)
 						else:
 							with open(imageFileName, 'wb') as f:
 								f.write(imageRequest.content)
@@ -157,6 +158,9 @@ class WebcomicScrapper(object):
 			# While loop end
 
 		self.logInfo('Page Count :',pageCount)
+		
+		if imagesFailuresUrls and len(imagesFailuresUrls) > 0:
+			self.logWarn('Some image requests have failed :',str(imagesFailuresUrls))
 		
 		if shouldPauseAtEnd:
 			os.system("pause")
