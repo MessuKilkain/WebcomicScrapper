@@ -1,54 +1,22 @@
 """
- This script 
+ WebcomicScrapper for Webcomic Questionnable Content
 """
-from bs4 import BeautifulSoup
-import re
-import os
 import os.path
-import string
-import requests
 import urllib.parse
-import datetime
 
-imageFilesDestinationFolder = 'QuestionableContent'
-pageCountLimit = 10000
+from WebcomicScrapper import WebcomicScrapper
 
-#firstCommicUrl = 'http://www.questionablecontent.net/view.php?comic=1'
-firstCommicUrl = 'http://www.questionablecontent.net/view.php?comic=3400'
+class WebcomicScrapper_QuestionableContent(WebcomicScrapper):
 
-def is_integer(s):
-	try:
-		int(s)
-		return True
-	except ValueError:
-		return False
+	def __init__(self):
+		WebcomicScrapper.__init__(self, startComicUrl='http://www.questionablecontent.net/view.php?comic=1', imageFilesDestinationFolder='QuestionableContent', pageCountLimit=60 )
 
-def print_FileAndSysout(*objects, end='\n'):
-	print(*objects)
-	if __file__:
-		with open(os.path.basename(__file__)+'.log', 'a') as f:
-			print(*objects, file=f)
-
-valid_chars = "-_.()%s%s" % (string.ascii_letters, string.digits)
-def cleanStringForFolderName(stringToClean):
-	temp = ''
-	for c in stringToClean:
-		if c in valid_chars:
-			temp += str(c)
-		else :
-			temp += '_'
-	return temp
-
-print_FileAndSysout("\nStar scrapping :",str(datetime.datetime.now()),'\n')
-
-nextUrl = firstCommicUrl
-pageCount = 0
-while pageCount < pageCountLimit and nextUrl:
-	print_FileAndSysout('#'+str(pageCount),'Next Url :',nextUrl)
-	r = requests.get(nextUrl)
-	if r.status_code == 200 :
-		soup = BeautifulSoup(r.text,'html.parser')
+	# return (nextUrl,imageFileName,imgSrc)
+	def getValuesFromPage(self,soup,request):
 		imgSrc = ''
+		imageFileName = ''
+		nextUrl = ''
+		
 		imgSrcExtension = ''
 		comicNumber = ''
 		img = soup.find('img',id='strip')
@@ -56,60 +24,39 @@ while pageCount < pageCountLimit and nextUrl:
 			imgSrc = img['src']
 			if imgSrc:
 				(tmpImgSrcRoot,imgSrcExtension) = os.path.splitext(imgSrc)
-				imgSrc = urllib.parse.urljoin(r.url,imgSrc)
-		# print_FileAndSysout( imgSrc, imgSrcExtension )
-		urlParsed = urllib.parse.urlparse(r.url)
+				imgSrc = urllib.parse.urljoin(request.url,imgSrc)
+		self.logDebug( imgSrc, imgSrcExtension )
+		urlParsed = urllib.parse.urlparse(request.url)
 		if urlParsed and urlParsed.query:
-			# print_FileAndSysout(urlParsed,urlParsed.query)
+			self.logDebug(urlParsed,urlParsed.query)
 			queryData = urllib.parse.parse_qs(urlParsed.query)
 			if queryData:
-				# print_FileAndSysout(queryData)
-				# print_FileAndSysout(queryData['comic'])
+				self.logDebug(queryData)
+				self.logDebug(queryData['comic'])
 				comicNumberList = queryData['comic']
-				if comicNumberList and len(comicNumberList) > 0 and is_integer(comicNumberList[0]):
+				if comicNumberList and len(comicNumberList) > 0 and self.is_integer(comicNumberList[0]):
 					comicNumber = comicNumberList[0]
-		if not imgSrc:
-			print_FileAndSysout('imgSrc is incorrect')
-		elif not imgSrcExtension:
-			print_FileAndSysout('imgSrcExtension is incorrect')
+		if not imgSrcExtension:
+			self.logWarn('imgSrcExtension is incorrect')
 		elif not comicNumber:
-			print_FileAndSysout('comicNumber is incorrect')
+			self.logWarn('comicNumber is incorrect')
 		else:
 			imageFileName = '%(comicNumber)04d%(ext)s' % {"comicNumber": int(comicNumber), 'ext': imgSrcExtension}
-			imageFileName = cleanStringForFolderName(imageFileName)
-			imageFileName = os.path.join(imageFilesDestinationFolder,imageFileName)
-			# print_FileAndSysout(imageFileName)
-			if os.path.isfile( imageFileName ):
-				print_FileAndSysout('\tFile '+imageFileName+' already exists.')
-			else:
-				imageRequest = requests.get(imgSrc)
-				if imageRequest.status_code != 200:
-					print_FileAndSysout('\tImage request failed :',r)
-				else:
-					with open(imageFileName, 'wb') as f:
-						f.write(imageRequest.content)
-						print_FileAndSysout('\tImage saved as '+imageFileName)
-		nextUrl = ''
+			imageFileName = self.cleanStringForFolderName(imageFileName)
+			imageFileName = os.path.join(self.imageFilesDestinationFolder,imageFileName)
+			self.logDebug(imageFileName)
 		if img and img.parent and img.parent['href'] and img.parent['href'] != '#':
-			nextUrl = urllib.parse.urljoin(r.url,img.parent['href'])
-		if nextUrl :
-			urlParsed = urllib.parse.urlparse(nextUrl)
-			if not( urlParsed.scheme and urlParsed.netloc and urlParsed.path ):
-				nextUrl = ''
-		if nextUrl:
-			pageCount += 1
+			nextUrl = urllib.parse.urljoin(request.url,img.parent['href'])
+		return (nextUrl,imageFileName,imgSrc)
 
-print_FileAndSysout('Page Count :',pageCount)
+# Start scrapping webcomic
+scrapper = WebcomicScrapper_QuestionableContent()
 
-os.system("pause")
+scrapper.startComicUrl = 'http://www.questionablecontent.net/view.php?comic=3420'
+scrapper.pageCountLimit = 10000
+scrapper.logFileName = os.path.basename(__file__)+'.log'
 
-
-
-
-
-
-
-
+scrapper.start(True)
 
 
 
