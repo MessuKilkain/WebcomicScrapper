@@ -1,6 +1,6 @@
 """
  WebcomicScrapper for Webcomic GamerCat
- http://www.thegamercat.com/comic/06102011/
+ http://www.thegamercat.com
 """
 import os.path
 import urllib.parse
