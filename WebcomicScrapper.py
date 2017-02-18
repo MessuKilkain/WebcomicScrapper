@@ -117,7 +117,10 @@ class WebcomicScrapper(object):
 	def start(self, shouldPauseAtEnd=True):
 		self.logInfo("\nStar scrapping :",str(datetime.datetime.now()),'\n')
 		imagesFailuresUrls = []
-		# TODO : improve by creating the destination folder if it does not exist
+		
+		# Create the destination folder if it does not exist
+		if self.imageFilesDestinationFolder and not os.path.exists(self.imageFilesDestinationFolder):
+			os.makedirs(self.imageFilesDestinationFolder)
 
 		nextUrl = self.startComicUrl
 		pageCount = 0
