@@ -9,6 +9,7 @@ import string
 import requests
 import urllib.parse
 import datetime
+import time
 
 class WebcomicScrapper(object):
 
@@ -17,11 +18,23 @@ class WebcomicScrapper(object):
 		self._startComicUrl = startComicUrl
 		self._imageFilesDestinationFolder = imageFilesDestinationFolder
 		self._pageCountLimit = pageCountLimit
+		self._interRequestWaitingTime = 1
 
 	@property
 	def validCharsForFolderName(self):
 		"""List of characters accepted for folder name."""
 		return self._validCharsForFolderName
+	
+	@property
+	def interRequestWaitingTime(self):
+		return self._interRequestWaitingTime
+	@interRequestWaitingTime.setter
+	def interRequestWaitingTime(self,value):
+		if ( not isinstance(value, float) and not isinstance(value, int) ) or value < 0.0 :
+			raise ValueError("interRequestWaitingTime is expected to be a positive number (int or float)")
+		else:
+			self._interRequestWaitingTime = value
+		return
 	
 	@property
 	def startComicUrl(self):
@@ -68,6 +81,7 @@ class WebcomicScrapper(object):
 		if __file__:
 			with open(os.path.basename(__file__)+'.log', 'a') as f:
 				print(*objects, file=f)
+		return
 	def logInfo(self,*objects, end='\n'):
 		self.print_FileAndSysout(*objects, end)
 		return
@@ -98,6 +112,7 @@ class WebcomicScrapper(object):
 		while ( self.pageCountLimit == -1 or pageCount < self.pageCountLimit) and nextUrl:
 			self.logInfo('#'+str(pageCount),'Next Url :',nextUrl)
 			r = requests.get(nextUrl)
+			self.logDebug('r.status_code :',r.status_code)
 			if r.status_code == 200 :
 				soup = BeautifulSoup(r.text,'html.parser')
 				
@@ -125,6 +140,9 @@ class WebcomicScrapper(object):
 						nextUrl = ''
 				if nextUrl:
 					pageCount += 1
+			if self.interRequestWaitingTime > 0:
+				time.sleep(self.interRequestWaitingTime)
+			# While loop end
 
 		self.logInfo('Page Count :',pageCount)
 		
