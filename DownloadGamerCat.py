@@ -28,7 +28,7 @@ class WebcomicScrapper_GamerCat(WebcomicScrapper):
 			img = imgArray[0]
 			try:
 				imgTitle = img['title']
-			except ValueError:
+			except KeyError:
 				self.logDebug( "No title for img" )
 			imgSrc = img['src']
 			if imgSrc:
@@ -63,8 +63,13 @@ class WebcomicScrapper_GamerCat(WebcomicScrapper):
 			self.logDebug(imageFileName)
 		
 		aNavNext = soup.select_one('.comic-nav-container .comic-nav .comic-nav-base.comic-nav-next')
-		if aNavNext and aNavNext['href'] and aNavNext['href'] != '#':
-			nextUrl = urllib.parse.urljoin(request.url,aNavNext['href'])
+		if aNavNext:
+			try:
+				nextRelaviteUrl = aNavNext['href']
+				if nextRelaviteUrl and nextRelaviteUrl != '#':
+					nextUrl = urllib.parse.urljoin(request.url,nextRelaviteUrl)
+			except KeyError:
+				self.logDebug( "No nextRelaviteUrl for aNavNext" )
 		return (nextUrl,imageFileName,imgSrc)
 		
 	def logDebug(self,*objects, end='\n'):
