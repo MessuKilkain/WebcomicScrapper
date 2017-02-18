@@ -51,7 +51,6 @@ class WebcomicScrapper_Sinfest(WebcomicScrapper):
 			imageFileName = self.cleanStringForFolderName(imageFileName)
 			imageFileName = os.path.join(self.imageFilesDestinationFolder,imageFileName)
 			self.logDebug(imageFileName)
-		nextUrl = ''
 		if imgDate:
 			nextUrlArray = soup.select('a img[src$="images/next.gif"]')
 			self.logDebug('nextUrlArray :',nextUrlArray)
