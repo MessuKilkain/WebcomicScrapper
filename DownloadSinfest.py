@@ -1,124 +1,75 @@
 """
- This script 
+ WebcomicScrapper for Webcomic Sinfest
 """
-from bs4 import BeautifulSoup
-import re
-import os
 import os.path
-import string
-import requests
 import urllib.parse
-import datetime
 
-imageFilesDestinationFolder = 'Sinfest'
-pageCountLimit = 1000
+from WebcomicScrapper import WebcomicScrapper
 
-firstCommicUrl = 'http://www.sinfest.net/view.php?date=2017-01-01'
+class WebcomicScrapper_Sinfest(WebcomicScrapper):
 
-def is_integer(s):
-	try:
-		int(s)
-		return True
-	except ValueError:
-		return False
+	def __init__(self):
+		WebcomicScrapper.__init__(self, startComicUrl='http://www.sinfest.net/view.php?date=2000-01-17', imageFilesDestinationFolder='Sinfest', pageCountLimit=60 )
 
-def print_FileAndSysout(*objects, end='\n'):
-	print(*objects)
-	if __file__:
-		with open(os.path.basename(__file__)+'.log', 'a') as f:
-			print(*objects, file=f)
-
-valid_chars = "-_.()%s%s" % (string.ascii_letters, string.digits)
-def cleanStringForFolderName(stringToClean):
-	temp = ''
-	for c in stringToClean:
-		if c in valid_chars:
-			temp += str(c)
-		else :
-			temp += '_'
-	return temp
-
-print_FileAndSysout("\nStar scrapping :",str(datetime.datetime.now()),'\n')
-
-nextUrl = firstCommicUrl
-pageCount = 0
-while pageCount < pageCountLimit and nextUrl:
-	print_FileAndSysout('#'+str(pageCount),'Next Url :',nextUrl)
-	r = requests.get(nextUrl)
-	if r.status_code == 200 :
-		soup = BeautifulSoup(r.text,'html.parser')
+	# return (nextUrl,imageFileName,imgSrc)
+	def getValuesFromPage(self,soup,request):
 		imgSrc = ''
+		imageFileName = ''
+		nextUrl = ''
+		
 		imgSrcExtension = ''
 		imgAlt = ''
 		imgDate = ''
 		imgArray = soup.select('table table img')
-		# print_FileAndSysout('imgArray :',imgArray)
+		self.logDebug('imgArray :',imgArray)
 		if imgArray and len(imgArray) > 0 :
 			img = imgArray[0]
 			imgSrc = img['src']
 			if imgSrc:
 				(tmpImgSrcRoot,imgSrcExtension) = os.path.splitext(imgSrc)
-				imgSrc = urllib.parse.urljoin(r.url,imgSrc)
+				imgSrc = urllib.parse.urljoin(request.url,imgSrc)
 			imgAlt = img['alt']
-			# print_FileAndSysout( imgSrc, imgSrcExtension ,imgAlt )
-		urlParsed = urllib.parse.urlparse(r.url)
+			self.logDebug( imgSrc, imgSrcExtension ,imgAlt )
+		urlParsed = urllib.parse.urlparse(request.url)
 		if urlParsed and urlParsed.query:
-			# print_FileAndSysout(urlParsed,urlParsed.query)
+			self.logDebug(urlParsed,urlParsed.query)
 			queryData = urllib.parse.parse_qs(urlParsed.query)
 			if queryData:
-				# print_FileAndSysout(queryData)
-				# print_FileAndSysout(queryData['date'])
+				self.logDebug(queryData)
+				self.logDebug(queryData['date'])
 				imgDateList = queryData['date']
 				if imgDateList and len(imgDateList) > 0:
 					imgDate = imgDateList[0]
-		if not imgSrc:
-			print_FileAndSysout('imgSrc is incorrect')
-		elif not imgSrcExtension:
-			print_FileAndSysout('imgSrcExtension is incorrect')
+		if not imgSrcExtension:
+			self.logWarn('imgSrcExtension is incorrect')
 		elif not imgAlt:
-			print_FileAndSysout('imgAlt is incorrect')
+			self.logWarn('imgAlt is incorrect')
 		elif not imgDate:
-			print_FileAndSysout('imgDate is incorrect')
+			self.logWarn('imgDate is incorrect')
 		else:
 			imageFileName = imgDate + '_-_' + imgAlt + imgSrcExtension
-			imageFileName = cleanStringForFolderName(imageFileName)
-			imageFileName = os.path.join(imageFilesDestinationFolder,imageFileName)
-			# print_FileAndSysout(imageFileName)
-			if os.path.isfile( imageFileName ):
-				print_FileAndSysout('\tFile '+imageFileName+' already exists.')
-			else:
-				imageRequest = requests.get(imgSrc)
-				if imageRequest.status_code != 200:
-					print_FileAndSysout('\tImage request failed :',r)
-				else:
-					with open(imageFileName, 'wb') as f:
-						f.write(imageRequest.content)
-						print_FileAndSysout('\tImage saved as '+imageFileName)
+			imageFileName = self.cleanStringForFolderName(imageFileName)
+			imageFileName = os.path.join(self.imageFilesDestinationFolder,imageFileName)
+			self.logDebug(imageFileName)
 		nextUrl = ''
 		if imgDate:
 			nextUrlArray = soup.select('a img[src$="images/next.gif"]')
-			# print_FileAndSysout('nextUrlArray :',nextUrlArray)
+			self.logDebug('nextUrlArray :',nextUrlArray)
 			if nextUrlArray and len(nextUrlArray) > 0 :
 				nextUrlA = nextUrlArray[0].parent
 				if nextUrlA and nextUrlA['href']:
-					nextUrl = urllib.parse.urljoin(r.url,nextUrlA['href'])
-		if nextUrl :
-			urlParsed = urllib.parse.urlparse(nextUrl)
-			if not( urlParsed.scheme and urlParsed.netloc and urlParsed.path ):
-				nextUrl = ''
-		if nextUrl:
-			pageCount += 1
-
-print_FileAndSysout('Page Count :',pageCount)
-
-os.system("pause")
+					nextUrl = urllib.parse.urljoin(request.url,nextUrlA['href'])
+		return (nextUrl,imageFileName,imgSrc)
 
 
+# Start scrapping webcomic
+scrapper = WebcomicScrapper_Sinfest()
 
+scrapper.startComicUrl = 'http://www.sinfest.net/view.php?date=2017-02-01'
+scrapper.pageCountLimit = 1000
+scrapper.logFileName = os.path.basename(__file__)+'.log'
 
-
-
-
+scrapper.start(True)
 
 
 
