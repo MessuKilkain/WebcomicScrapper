@@ -15,6 +15,7 @@ class WebcomicScrapper(object):
 		self._validCharsForFolderName = "-_.()%s%s" % (string.ascii_letters, string.digits)
 		self.startComicUrl = startComicUrl
 		self.imageFilesDestinationFolder = imageFilesDestinationFolder
+		self.logFileName = self.imageFilesDestinationFolder+'.log'
 		self.pageCountLimit = pageCountLimit
 		self.interRequestWaitingTime = 1
 
@@ -57,6 +58,17 @@ class WebcomicScrapper(object):
 		return
 	
 	@property
+	def logFileName(self):
+		return self._logFileName
+	@logFileName.setter
+	def logFileName(self,value):
+		if not isinstance(value, str):
+			raise ValueError("logFileName is expected to be a string")
+		else:
+			self._logFileName = value
+		return
+	
+	@property
 	def pageCountLimit(self):
 		return self._pageCountLimit
 	@pageCountLimit.setter
@@ -77,7 +89,7 @@ class WebcomicScrapper(object):
 	def print_FileAndSysout(self,*objects, end='\n'):
 		print(*objects)
 		if __file__:
-			with open(os.path.basename(__file__)+'.log', 'a') as f:
+			with open(self.logFileName, 'a') as f:
 				print(*objects, file=f)
 		return
 	def logInfo(self,*objects, end='\n'):
