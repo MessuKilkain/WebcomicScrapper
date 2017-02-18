@@ -41,9 +41,9 @@ class WebcomicScrapper_MenageA3(WebcomicScrapper):
 		# Get the date of the comic
 		if not imgDate:
 			fallbackDate = soup.select_one('#cndate')
-			self.logDebug("fallbackDate : ",str(fallbackDate))
-			self.logDebug("fallbackDate.get_text() : ",str(fallbackDate.get_text()))
 			if fallbackDate and fallbackDate.get_text():
+				self.logDebug("fallbackDate : ",str(fallbackDate))
+				self.logDebug("fallbackDate.get_text() : ",str(fallbackDate.get_text()))
 				imgDate = datetime.strptime( fallbackDate.get_text(), '%B %d, %Y' ).strftime('%Y-%m-%d')
 		
 		if not imgSrcExtension:
@@ -59,7 +59,7 @@ class WebcomicScrapper_MenageA3(WebcomicScrapper):
 			self.logDebug(imageFileName)
 		
 		aNavNext = soup.select_one('#cnav #cndnext')
-		if aNavNext['href'] and aNavNext['href'] != '#':
+		if aNavNext and aNavNext['href'] and aNavNext['href'] != '#':
 			nextUrl = urllib.parse.urljoin(request.url,aNavNext['href'])
 		return (nextUrl,imageFileName,imgSrc)
 		
