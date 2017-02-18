@@ -1,16 +1,10 @@
 """
- This script 
+ WebcomicScrapper for Manwa I don't want this kind of Hero
 """
 import os.path
 import urllib.parse
 
 from WebcomicScrapper import WebcomicScrapper
-
-# imageFilesDestinationFolder = cleanStringForFolderName('I_Don_t_Want_This_Kind_of_Hero_-_Manga')
-imageFilesDestinationFolder = 'I_Don_t_Want_This_Kind_of_Hero_-_Manga'
-pageCountLimit = 1000
-
-firstCommicUrl = 'http://mangafox.me/manga/i_don_t_want_this_kind_of_hero/c142/1.html'
 
 class WebcomicScrapper_IDontWantThisKindOfHero(WebcomicScrapper):
 
@@ -92,7 +86,9 @@ class WebcomicScrapper_IDontWantThisKindOfHero(WebcomicScrapper):
 # Start scrapping webcomic
 scrapper = WebcomicScrapper_IDontWantThisKindOfHero()
 
-scrapper.startComicUrl = firstCommicUrl
+scrapper.startComicUrl = 'http://mangafox.me/manga/i_don_t_want_this_kind_of_hero/c142/1.html'
+# scrapper.pageCountLimit = 1000
+scrapper.pageCountLimit = 5
 
 scrapper.start(True)
 
