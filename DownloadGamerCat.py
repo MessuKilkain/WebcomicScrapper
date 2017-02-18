@@ -80,7 +80,7 @@ class WebcomicScrapper_GamerCat(WebcomicScrapper):
 # Start scrapping webcomic
 scrapper = WebcomicScrapper_GamerCat()
 
-# scrapper.startComicUrl = 'http://www.thegamercat.com/comic/generous-love/'
+scrapper.startComicUrl = 'http://www.thegamercat.com/comic/generous-love/'
 scrapper.pageCountLimit = 1000
 # scrapper.interRequestWaitingTime = 0;
 scrapper.logFileName = os.path.basename(__file__)+'.log'
