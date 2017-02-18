@@ -1,14 +1,8 @@
 """
  This script 
 """
-from bs4 import BeautifulSoup
-import re
-import os
 import os.path
-import string
-import requests
 import urllib.parse
-import datetime
 
 from WebcomicScrapper import WebcomicScrapper
 
