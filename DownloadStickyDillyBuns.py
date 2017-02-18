@@ -59,7 +59,7 @@ class WebcomicScrapper_StickyDillyBuns(WebcomicScrapper):
 			self.logDebug(imageFileName)
 		
 		aNavNext = soup.select_one('#cnav #cndnext')
-		if aNavNext['href'] and aNavNext['href'] != '#':
+		if aNavNext and aNavNext['href'] and aNavNext['href'] != '#':
 			nextUrl = urllib.parse.urljoin(request.url,aNavNext['href'])
 		return (nextUrl,imageFileName,imgSrc)
 		
@@ -71,9 +71,9 @@ class WebcomicScrapper_StickyDillyBuns(WebcomicScrapper):
 # Start scrapping webcomic
 scrapper = WebcomicScrapper_StickyDillyBuns()
 
-# scrapper.startComicUrl = 'http://www.stickydillybuns.com/strips-sdb/sticky_dilly_buns_status_update'
+scrapper.startComicUrl = 'http://www.stickydillybuns.com/strips-sdb/sticky_dilly_buns_status_update'
 scrapper.pageCountLimit = 1000
-scrapper.interRequestWaitingTime = 0;
+# scrapper.interRequestWaitingTime = 0;
 scrapper.logFileName = os.path.basename(__file__)+'.log'
 
 scrapper.start(True)
