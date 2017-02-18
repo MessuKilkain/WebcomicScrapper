@@ -13,10 +13,10 @@ class WebcomicScrapper(object):
 
 	def __init__(self,startComicUrl='',imageFilesDestinationFolder='',pageCountLimit=1):
 		self._validCharsForFolderName = "-_.()%s%s" % (string.ascii_letters, string.digits)
-		self._startComicUrl = startComicUrl
-		self._imageFilesDestinationFolder = imageFilesDestinationFolder
-		self._pageCountLimit = pageCountLimit
-		self._interRequestWaitingTime = 1
+		self.startComicUrl = startComicUrl
+		self.imageFilesDestinationFolder = imageFilesDestinationFolder
+		self.pageCountLimit = pageCountLimit
+		self.interRequestWaitingTime = 1
 
 	@property
 	def validCharsForFolderName(self):
