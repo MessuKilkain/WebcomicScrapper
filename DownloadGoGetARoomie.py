@@ -31,11 +31,23 @@ class WebcomicScrapper_GoGetARoomie(WebcomicScrapper):
 				# Get the date of the comic
 				tmpImgSrcRoot = os.path.basename(tmpImgSrcRoot)
 				imgNameParts = tmpImgSrcRoot.split('-')
-				if imgNameParts and len(imgNameParts) > 3:
+				if imgNameParts and len(imgNameParts) > 3 and self.is_integer(imgNameParts[1]) and self.is_integer(imgNameParts[2]) and self.is_integer(imgNameParts[3]):
 					imgDate = imgNameParts[1]+'-'+imgNameParts[2]+'-'+imgNameParts[3]
 			# TODO : improve by adding try around get attribute with KeyError handling
 			imgAlt = img['title']
 			self.logDebug( imgSrc, imgSrcExtension ,imgAlt )
+		
+		#imgDate fallback
+		if not imgDate:
+			# TODO : imrpove by recomposing the date
+			fallbackDate = soup.select_one('.cc-publishtime')
+			self.logDebug("fallbackDate : ",str(fallbackDate))
+			self.logDebug("fallbackDate.get_text() : ",str(fallbackDate.get_text()))
+			if fallbackDate and fallbackDate.get_text():
+				fallbackDateParts = fallbackDate.get_text().split()
+				if fallbackDateParts and len(fallbackDateParts) > 1:
+					imgDate = '-'.join( fallbackDateParts[1].split('.') )
+		
 		if not imgSrcExtension:
 			self.logWarn('imgSrcExtension is incorrect')
 		elif not imgAlt:
