@@ -131,6 +131,7 @@ class WebcomicScrapper(object):
 			if r.status_code == 200 :
 				soup = BeautifulSoup(r.text,'html.parser')
 				
+				currentUrl = nextUrl
 				(nextUrl,imageFileName,imgSrc) = self.getValuesFromPage( soup, r )
 				
 				if not imgSrc:
@@ -152,6 +153,9 @@ class WebcomicScrapper(object):
 								f.write(imageRequest.content)
 								self.logInfo('\tImage saved as '+imageFileName)
 				
+				if currentUrl == nextUrl:
+					# We prevent the loop to stay on the same url
+					nextUrl = ''
 				if nextUrl :
 					urlParsed = urllib.parse.urlparse(nextUrl)
 					if not( urlParsed.scheme and urlParsed.netloc and urlParsed.path ):
