@@ -3,6 +3,7 @@
 """
 import os.path
 import urllib.parse
+import re
 
 from WebcomicScrapper import WebcomicScrapper
 
