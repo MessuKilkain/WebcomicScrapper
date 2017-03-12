@@ -8,6 +8,7 @@ import requests
 import urllib.parse
 import datetime
 import time
+import shelve
 
 class WebcomicScrapper(object):
 
@@ -16,6 +17,7 @@ class WebcomicScrapper(object):
 		self.startComicUrl = startComicUrl
 		self.imageFilesDestinationFolder = imageFilesDestinationFolder
 		self.logFileName = self.imageFilesDestinationFolder+'.log'
+		self.shelveFileName = self.imageFilesDestinationFolder+'.shelve'
 		self.pageCountLimit = pageCountLimit
 		self.interRequestWaitingTime = 1
 
@@ -66,6 +68,35 @@ class WebcomicScrapper(object):
 			raise ValueError("logFileName is expected to be a string")
 		else:
 			self._logFileName = value
+		return
+	
+	@property
+	def shelveFileName(self):
+		return self._shelveFileName
+	@shelveFileName.setter
+	def shelveFileName(self,value):
+		if not isinstance(value, str):
+			raise ValueError("shelveFileName is expected to be a string")
+		else:
+			self._shelveFileName = value
+		return
+	
+	@property
+	def lastValidUrlWithNext(self):
+		returnedValue = ''
+		try:
+			with shelve.open(self.shelveFileName, flag='r') as db:
+				returnedValue = db['lastValidUrlWithNext']
+		finally:
+			return returnedValue
+	@lastValidUrlWithNext.setter
+	def lastValidUrlWithNext(self,value):
+		if not isinstance(value, str):
+			raise ValueError("lastValidUrlWithNext is expected to be a string")
+		else:
+			with shelve.open(self.shelveFileName) as db:
+				db['lastValidUrlWithNext'] = value
+				db.sync()
 		return
 	
 	@property
