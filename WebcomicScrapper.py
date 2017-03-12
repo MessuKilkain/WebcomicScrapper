@@ -12,12 +12,14 @@ import shelve
 
 class WebcomicScrapper(object):
 
-	def __init__(self,startComicUrl='',imageFilesDestinationFolder='',pageCountLimit=1):
+	def __init__(self,startComicUrl='',imageFilesDestinationFolder='',pageCountLimit=1,startWithLastValidUrlWithNext=False):
 		self._validCharsForFolderName = "-_.()%s%s" % (string.ascii_letters, string.digits)
 		self.startComicUrl = startComicUrl
 		self.imageFilesDestinationFolder = imageFilesDestinationFolder
 		self.logFileName = self.imageFilesDestinationFolder+'.log'
 		self.shelveFileName = self.imageFilesDestinationFolder+'.shelve'
+		if startWithLastValidUrlWithNext and self.lastValidUrlWithNext:
+			self.startComicUrl = self.lastValidUrlWithNext
 		self.pageCountLimit = pageCountLimit
 		self.interRequestWaitingTime = 1
 
