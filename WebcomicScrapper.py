@@ -159,7 +159,10 @@ class WebcomicScrapper(object):
 			self.logInfo('#'+str(pageCount),'Next Url :',nextUrl)
 			r = requests.get(nextUrl)
 			self.logDebug('r.status_code :',r.status_code)
-			if r.status_code == 200 :
+			if r.status_code != 200:
+				self.logWarn('\tRequest failed :',r)
+				imagesFailuresUrls.append(r.url)
+			elif r.status_code == 200 :
 				soup = BeautifulSoup(r.text,'html.parser')
 				
 				currentUrl = nextUrl
