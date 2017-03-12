@@ -201,6 +201,8 @@ class WebcomicScrapper(object):
 						nextUrl = ''
 				if nextUrl:
 					pageCount += 1
+					if len(imagesFailuresUrls) == 0 and everythingWentWell:
+						self.lastValidUrlWithNext = r.url
 			if self.interRequestWaitingTime > 0:
 				time.sleep(self.interRequestWaitingTime)
 			# While loop end
