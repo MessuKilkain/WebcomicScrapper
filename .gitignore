@@ -3,6 +3,7 @@
 *.png
 *.gif
 *.log
+*.shelve.*
 
 ### https://github.com/github/gitignore/blob/master/Python.gitignore
 
