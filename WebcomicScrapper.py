@@ -159,7 +159,9 @@ class WebcomicScrapper(object):
 			self.logInfo('#'+str(pageCount),'Next Url :',nextUrl)
 			r = requests.get(nextUrl)
 			self.logDebug('r.status_code :',r.status_code)
+			everythingWentWell = True
 			if r.status_code != 200:
+				everythingWentWell = False
 				self.logWarn('\tRequest failed :',r)
 				imagesFailuresUrls.append(r.url)
 			elif r.status_code == 200 :
@@ -169,9 +171,11 @@ class WebcomicScrapper(object):
 				(nextUrl,imageFileName,imgSrc) = self.getValuesFromPage( soup, r )
 				
 				if not imgSrc:
+					everythingWentWell = False
 					self.logWarn('imgSrc is incorrect')
 					imagesFailuresUrls.append(r.url)
 				elif not imageFileName :
+					everythingWentWell = False
 					self.logWarn('imageFileName is incorrect')
 					imagesFailuresUrls.append(r.url)
 				else:
@@ -180,6 +184,7 @@ class WebcomicScrapper(object):
 					else:
 						imageRequest = requests.get(imgSrc)
 						if imageRequest.status_code != 200:
+							everythingWentWell = False
 							self.logWarn('\tImage request failed :',r)
 							imagesFailuresUrls.append(r.url)
 						else:
