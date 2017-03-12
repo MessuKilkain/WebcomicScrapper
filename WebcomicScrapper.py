@@ -211,6 +211,8 @@ class WebcomicScrapper(object):
 		
 		if imagesFailuresUrls and len(imagesFailuresUrls) > 0:
 			self.logWarn('Some image requests have failed :',str(imagesFailuresUrls))
+		if self.lastValidUrlWithNext:
+			self.logInfo('Last valid url saved :',self.lastValidUrlWithNext)
 		
 		if shouldPauseAtEnd:
 			os.system("pause")
