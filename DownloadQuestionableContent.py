@@ -52,7 +52,7 @@ class WebcomicScrapper_QuestionableContent(WebcomicScrapper):
 # Start scrapping webcomic
 scrapper = WebcomicScrapper_QuestionableContent()
 
-scrapper.startComicUrl = 'http://www.questionablecontent.net/view.php?comic=3420'
+# scrapper.startComicUrl = 'http://www.questionablecontent.net/view.php?comic=3420'
 scrapper.pageCountLimit = 10000
 scrapper.logFileName = os.path.basename(__file__)+'.log'
 

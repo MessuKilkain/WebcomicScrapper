@@ -87,7 +87,7 @@ class WebcomicScrapper_IDontWantThisKindOfHero(WebcomicScrapper):
 # Start scrapping webcomic
 scrapper = WebcomicScrapper_IDontWantThisKindOfHero()
 
-scrapper.startComicUrl = 'http://mangafox.me/manga/i_don_t_want_this_kind_of_hero/c142/22.html'
+# scrapper.startComicUrl = 'http://mangafox.me/manga/i_don_t_want_this_kind_of_hero/c142/22.html'
 scrapper.pageCountLimit = 1000
 scrapper.logFileName = os.path.basename(__file__)+'.log'
 
