@@ -22,6 +22,7 @@ class WebcomicScrapper(object):
 			self.startComicUrl = self.lastValidUrlWithNext
 		self.pageCountLimit = pageCountLimit
 		self.interRequestWaitingTime = 1
+		self.numberOfFailureBeforeStop = -1
 
 	@property
 	def validCharsForFolderName(self):
@@ -112,6 +113,17 @@ class WebcomicScrapper(object):
 			self._pageCountLimit = value
 		return
 	
+	@property
+	def numberOfFailureBeforeStop(self):
+		return self._numberOfFailureBeforeStop
+	@numberOfFailureBeforeStop.setter
+	def numberOfFailureBeforeStop(self,value):
+		if ( not isinstance(value, int) ) or value < -1 or value == 0:
+			raise ValueError("numberOfFailureBeforeStop is expected to be a positive int or null or -1 for no limit")
+		else:
+			self._numberOfFailureBeforeStop = value
+		return
+	
 	def is_integer(self,s):
 		try:
 			int(s)
@@ -158,55 +170,65 @@ class WebcomicScrapper(object):
 		nextUrl = self.startComicUrl
 		pageCount = 0
 		while ( self.pageCountLimit == -1 or pageCount < self.pageCountLimit) and nextUrl:
-			self.logInfo('#'+str(pageCount),'Next Url :',nextUrl)
-			r = requests.get(nextUrl)
-			self.logDebug('r.status_code :',r.status_code)
+			currentUrl = nextUrl
+			self.logInfo('#'+str(pageCount),'Url :',currentUrl)
 			everythingWentWell = True
-			if r.status_code != 200:
-				everythingWentWell = False
-				self.logWarn('\tRequest failed :',r)
-				imagesFailuresUrls.append(r.url)
-			elif r.status_code == 200 :
-				soup = BeautifulSoup(r.text,'html.parser')
-				
-				currentUrl = nextUrl
-				(nextUrl,imageFileName,imgSrc) = self.getValuesFromPage( soup, r )
-				
-				if not imgSrc:
+			try:
+				r = requests.get(currentUrl)
+				self.logDebug('r.status_code :',r.status_code)
+				self.logDebug('r :',str(r))
+				if r.status_code != 200:
 					everythingWentWell = False
-					self.logWarn('imgSrc is incorrect')
-					imagesFailuresUrls.append(r.url)
-				elif not imageFileName :
-					everythingWentWell = False
-					self.logWarn('imageFileName is incorrect')
-					imagesFailuresUrls.append(r.url)
-				else:
-					if os.path.isfile( imageFileName ):
-						self.logInfo('\tFile '+imageFileName+' already exists.')
+					self.logWarn('\tRequest failed :',r)
+				elif r.status_code == 200 :
+					soup = BeautifulSoup(r.text,'html.parser')
+					
+					(nextUrl,imageFileName,imgSrc) = self.getValuesFromPage( soup, r )
+					
+					if not imgSrc:
+						everythingWentWell = False
+						self.logWarn('imgSrc is incorrect')
+					elif not imageFileName :
+						everythingWentWell = False
+						self.logWarn('imageFileName is incorrect')
 					else:
-						imageRequest = requests.get(imgSrc)
-						if imageRequest.status_code != 200:
-							everythingWentWell = False
-							self.logWarn('\tImage request failed :',r)
-							imagesFailuresUrls.append(r.url)
+						if os.path.isfile( imageFileName ):
+							self.logInfo('\tFile '+imageFileName+' already exists.')
 						else:
-							with open(imageFileName, 'wb') as f:
-								f.write(imageRequest.content)
-								self.logInfo('\tImage saved as '+imageFileName)
-				
-				if currentUrl == nextUrl:
-					# We prevent the loop to stay on the same url
-					nextUrl = ''
-				if nextUrl :
-					urlParsed = urllib.parse.urlparse(nextUrl)
-					if not( urlParsed.scheme and urlParsed.netloc and urlParsed.path ):
+							imageRequest = requests.get(imgSrc)
+							if imageRequest.status_code != 200:
+								everythingWentWell = False
+								self.logWarn('\tImage request failed :',r)
+							else:
+								with open(imageFileName, 'wb') as f:
+									f.write(imageRequest.content)
+									self.logInfo('\tImage saved as '+imageFileName)
+					
+					if currentUrl == nextUrl :
+						# We prevent the loop to stay on the same url
 						nextUrl = ''
-				if nextUrl:
-					pageCount += 1
-					if len(imagesFailuresUrls) == 0 and everythingWentWell:
-						self.lastValidUrlWithNext = r.url
-			if self.interRequestWaitingTime > 0:
-				time.sleep(self.interRequestWaitingTime)
+					if nextUrl :
+						urlParsed = urllib.parse.urlparse(nextUrl)
+						if not( urlParsed.scheme and urlParsed.netloc and urlParsed.path ):
+							nextUrl = ''
+					if nextUrl:
+						pageCount += 1
+						if len(imagesFailuresUrls) == 0 and everythingWentWell:
+							self.lastValidUrlWithNext = currentUrl
+			except Exception as e:
+				everythingWentWell = False
+				self.logWarn('Request Error :',str(e))
+				# We stop the loop since we are not able to get a nextUrl
+				nextUrl = ''
+			finally:
+				if not everythingWentWell:
+					imagesFailuresUrls.append(currentUrl)
+				if self.interRequestWaitingTime > 0:
+					time.sleep(self.interRequestWaitingTime)
+				if self.numberOfFailureBeforeStop != -1 and self.numberOfFailureBeforeStop < len(imagesFailuresUrls):
+					# We stop the loop since we encountered more than tolerated number of failure
+					self.logWarn('Number of failure before stop(',str(self.numberOfFailureBeforeStop),') met')
+					nextUrl = ''
 			# While loop end
 
 		self.logInfo('Page Count :',pageCount)
