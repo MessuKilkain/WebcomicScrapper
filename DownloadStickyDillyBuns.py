@@ -72,6 +72,7 @@ class WebcomicScrapper_StickyDillyBuns(WebcomicScrapper):
 scrapper = WebcomicScrapper_StickyDillyBuns()
 
 # scrapper.startComicUrl = 'http://www.stickydillybuns.com/strips-sdb/sticky_dilly_buns_status_update'
+# scrapper.startComicUrl = 'http://www.stickydillybuns.com/strips-sdb/to_the_next_level'
 scrapper.pageCountLimit = 1000
 # scrapper.interRequestWaitingTime = 0;
 scrapper.logFileName = os.path.basename(__file__)+'.log'

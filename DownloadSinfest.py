@@ -66,6 +66,7 @@ scrapper = WebcomicScrapper_Sinfest()
 
 # scrapper.startComicUrl = 'http://www.sinfest.net/view.php?date=2017-03-01'
 scrapper.pageCountLimit = 1000
+# scrapper.interRequestWaitingTime = 5
 scrapper.logFileName = os.path.basename(__file__)+'.log'
 
 scrapper.start(True)
