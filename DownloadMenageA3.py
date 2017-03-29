@@ -22,11 +22,10 @@ class WebcomicScrapper_MenageA3(WebcomicScrapper):
 		imgSrcExtension = ''
 		imgTitle = ''
 		imgDate = ''
-		imgArray = soup.select('#cc img')
-		self.logDebug('imgArray :',imgArray)
-		if imgArray and len(imgArray) > 0 :
-			img = imgArray[0]
-			imgSrc = img['src']
+		imgElement = soup.select_one('#cc img')
+		self.logDebug('imgElement :',imgElement)
+		if imgElement :
+			imgSrc = imgElement['src']
 			if imgSrc:
 				(tmpImgSrcRoot,imgSrcExtension) = os.path.splitext(imgSrc)
 				imgSrc = urllib.parse.urljoin(request.url,imgSrc)
