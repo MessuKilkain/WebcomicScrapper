@@ -184,6 +184,7 @@ class WebcomicScrapper(object):
 					soup = BeautifulSoup(r.text,'html.parser')
 					
 					(nextUrl,imageFileName,imgSrc) = self.getValuesFromPage( soup, r )
+					self.logDebug("nextUrl:",str(nextUrl),"imageFileName:",imageFileName,"imgSrc:",imgSrc)
 					
 					if not imgSrc:
 						everythingWentWell = False
@@ -206,9 +207,11 @@ class WebcomicScrapper(object):
 					
 					if currentUrl == nextUrl :
 						# We prevent the loop to stay on the same url
+						self.logDebug("Next url is the same as current url")
 						nextUrl = ''
 					if nextUrl :
 						urlParsed = urllib.parse.urlparse(nextUrl)
+						self.logDebug(urlParsed)
 						if not( urlParsed.scheme and urlParsed.netloc and urlParsed.path ):
 							nextUrl = ''
 					if nextUrl:
