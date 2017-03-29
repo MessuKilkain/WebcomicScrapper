@@ -11,7 +11,7 @@ from WebcomicScrapper import WebcomicScrapper
 class WebcomicScrapper_MenageA3(WebcomicScrapper):
 
 	def __init__(self):
-		WebcomicScrapper.__init__(self, startComicUrl='http://www.ma3comic.com/strips-ma3/for_new_readers', imageFilesDestinationFolder='MenageA3', pageCountLimit=60 )
+		WebcomicScrapper.__init__(self, startComicUrl='http://www.ma3comic.com/strips-ma3/For_new_readers', imageFilesDestinationFolder='MenageA3', pageCountLimit=60 )
 
 	# return (nextUrl,imageFileName,imgSrc)
 	def getValuesFromPage(self,soup,request):
@@ -36,6 +36,16 @@ class WebcomicScrapper_MenageA3(WebcomicScrapper):
 			currentOption = soup.select_one('select#navjump option[value=""]')
 			if currentOption:
 				imgTitle = currentOption.get_text()
+		if not imgTitle:
+			urlParsed = urllib.parse.urlparse(request.url)
+			if urlParsed and urlParsed.path:
+				self.logDebug(urlParsed,urlParsed.path)
+				(pathBeforePage,pageFileName) = os.path.split(urlParsed.path)
+				if pageFileName:
+					imgTitle = pageFileName
+			if imgTitle and imgElement and imgElement['title'] :
+				self.logDebug(str(imgElement))
+				imgTitle = str(imgElement['title']) + ' - ' + imgTitle
 		
 		# Get the date of the comic
 		if not imgDate:
@@ -44,6 +54,15 @@ class WebcomicScrapper_MenageA3(WebcomicScrapper):
 				self.logDebug("fallbackDate : ",str(fallbackDate))
 				self.logDebug("fallbackDate.get_text() : ",str(fallbackDate.get_text()))
 				imgDate = datetime.strptime( fallbackDate.get_text(), '%B %d, %Y' ).strftime('%Y-%m-%d')
+		if not imgDate and imgSrc:
+			urlParsed = urllib.parse.urlparse(imgSrc)
+			if urlParsed and urlParsed.path:
+				self.logDebug(urlParsed,urlParsed.path)
+				(pathBeforePage,imgFileName) = os.path.split(urlParsed.path)
+				if imgFileName:
+					self.logDebug("imgFileName : ",str(imgFileName))
+					(imgFileName,tmp) = os.path.splitext(imgFileName)
+					imgDate = datetime.strptime( imgFileName[3:], '%Y%m%d' ).strftime('%Y-%m-%d')
 		
 		if not imgSrcExtension:
 			self.logWarn('imgSrcExtension is incorrect')
@@ -60,6 +79,10 @@ class WebcomicScrapper_MenageA3(WebcomicScrapper):
 		aNavNext = soup.select_one('#cnav #cndnext')
 		if aNavNext and aNavNext['href'] and aNavNext['href'] != '#':
 			nextUrl = urllib.parse.urljoin(request.url,aNavNext['href'])
+		if not nextUrl:
+			aNavNext = soup.select_one('.nav a.next')
+			if aNavNext and aNavNext['href'] and aNavNext['href'] != '#':
+				nextUrl = urllib.parse.urljoin(request.url,aNavNext['href'])
 		return (nextUrl,imageFileName,imgSrc)
 		
 	def logDebug(self,*objects, end='\n'):
