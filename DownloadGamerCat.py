@@ -76,16 +76,16 @@ class WebcomicScrapper_GamerCat(WebcomicScrapper):
 		# self.print_FileAndSysout(*objects, end)
 		return
 
+if __name__ == '__main__':
+	# Start scrapping webcomic
+	scrapper = WebcomicScrapper_GamerCat()
 
-# Start scrapping webcomic
-scrapper = WebcomicScrapper_GamerCat()
+	# scrapper.startComicUrl = 'http://www.thegamercat.com/comic/generous-love/'
+	scrapper.pageCountLimit = 1000
+	# scrapper.interRequestWaitingTime = 0;
+	scrapper.logFileName = os.path.basename(__file__)+'.log'
 
-# scrapper.startComicUrl = 'http://www.thegamercat.com/comic/generous-love/'
-scrapper.pageCountLimit = 1000
-# scrapper.interRequestWaitingTime = 0;
-scrapper.logFileName = os.path.basename(__file__)+'.log'
-
-scrapper.start(True)
+	scrapper.start(True)
 
 
 

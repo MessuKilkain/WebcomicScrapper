@@ -49,14 +49,15 @@ class WebcomicScrapper_QuestionableContent(WebcomicScrapper):
 			nextUrl = urllib.parse.urljoin(request.url,img.parent['href'])
 		return (nextUrl,imageFileName,imgSrc)
 
-# Start scrapping webcomic
-scrapper = WebcomicScrapper_QuestionableContent()
+if __name__ == '__main__':
+	# Start scrapping webcomic
+	scrapper = WebcomicScrapper_QuestionableContent()
 
-# scrapper.startComicUrl = 'http://www.questionablecontent.net/view.php?comic=3420'
-scrapper.pageCountLimit = 10000
-scrapper.logFileName = os.path.basename(__file__)+'.log'
+	# scrapper.startComicUrl = 'http://www.questionablecontent.net/view.php?comic=3420'
+	scrapper.pageCountLimit = 10000
+	scrapper.logFileName = os.path.basename(__file__)+'.log'
 
-scrapper.start(True)
+	scrapper.start(True)
 
 
 

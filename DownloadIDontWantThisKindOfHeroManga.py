@@ -84,14 +84,15 @@ class WebcomicScrapper_IDontWantThisKindOfHero(WebcomicScrapper):
 						nextUrl = urllib.parse.urljoin(request.url,nextUrlA['href'])
 		return (nextUrl,imageFileName,imgSrc)
 
-# Start scrapping webcomic
-scrapper = WebcomicScrapper_IDontWantThisKindOfHero()
+if __name__ == '__main__':
+	# Start scrapping webcomic
+	scrapper = WebcomicScrapper_IDontWantThisKindOfHero()
 
-# scrapper.startComicUrl = 'http://mangafox.me/manga/i_don_t_want_this_kind_of_hero/c142/22.html'
-scrapper.pageCountLimit = 1000
-scrapper.logFileName = os.path.basename(__file__)+'.log'
+	# scrapper.startComicUrl = 'http://mangafox.me/manga/i_don_t_want_this_kind_of_hero/c142/22.html'
+	scrapper.pageCountLimit = 1000
+	scrapper.logFileName = os.path.basename(__file__)+'.log'
 
-scrapper.start(True)
+	scrapper.start(True)
 
 
 

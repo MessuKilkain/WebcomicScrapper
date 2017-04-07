@@ -85,16 +85,16 @@ class WebcomicScrapper_DarthsAndDroids(WebcomicScrapper):
 		# self.print_FileAndSysout(*objects, end)
 		return
 
+if __name__ == '__main__':
+	# Start scrapping webcomic
+	scrapper = WebcomicScrapper_DarthsAndDroids()
 
-# Start scrapping webcomic
-scrapper = WebcomicScrapper_DarthsAndDroids()
+	# scrapper.startComicUrl = 'http://www.darthsanddroids.net/episodes/1472.html'
+	scrapper.pageCountLimit = 2000
+	# scrapper.interRequestWaitingTime = 0;
+	scrapper.logFileName = os.path.basename(__file__)+'.log'
 
-# scrapper.startComicUrl = 'http://www.darthsanddroids.net/episodes/1472.html'
-scrapper.pageCountLimit = 2000
-# scrapper.interRequestWaitingTime = 0;
-scrapper.logFileName = os.path.basename(__file__)+'.log'
-
-scrapper.start(True)
+	scrapper.start(True)
 
 
 

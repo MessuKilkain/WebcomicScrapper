@@ -89,17 +89,17 @@ class WebcomicScrapper_MenageA3(WebcomicScrapper):
 		# self.print_FileAndSysout(*objects, end)
 		return
 
+if __name__ == '__main__':
+	# Start scrapping webcomic
+	scrapper = WebcomicScrapper_MenageA3()
 
-# Start scrapping webcomic
-scrapper = WebcomicScrapper_MenageA3()
+	# scrapper.startComicUrl = 'http://www.ma3comic.com/strips-ma3/this_is_getting_unhealthy'
+	# scrapper.startComicUrl = 'http://www.ma3comic.com/strips-ma3/there_is_nothing_strange'
+	scrapper.pageCountLimit = 2000
+	# scrapper.interRequestWaitingTime = 0;
+	scrapper.logFileName = os.path.basename(__file__)+'.log'
 
-# scrapper.startComicUrl = 'http://www.ma3comic.com/strips-ma3/this_is_getting_unhealthy'
-# scrapper.startComicUrl = 'http://www.ma3comic.com/strips-ma3/there_is_nothing_strange'
-scrapper.pageCountLimit = 2000
-# scrapper.interRequestWaitingTime = 0;
-scrapper.logFileName = os.path.basename(__file__)+'.log'
-
-scrapper.start(True)
+	scrapper.start(True)
 
 
 

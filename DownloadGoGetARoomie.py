@@ -73,16 +73,16 @@ class WebcomicScrapper_GoGetARoomie(WebcomicScrapper):
 		# self.print_FileAndSysout(*objects, end)
 		return
 
+if __name__ == '__main__':
+	# Start scrapping webcomic
+	scrapper = WebcomicScrapper_GoGetARoomie()
 
-# Start scrapping webcomic
-scrapper = WebcomicScrapper_GoGetARoomie()
+	# scrapper.startComicUrl = 'http://www.gogetaroomie.com/comic/enough-kids-to-go-around'
+	scrapper.pageCountLimit = 1000
+	# scrapper.interRequestWaitingTime = 0;
+	scrapper.logFileName = os.path.basename(__file__)+'.log'
 
-# scrapper.startComicUrl = 'http://www.gogetaroomie.com/comic/enough-kids-to-go-around'
-scrapper.pageCountLimit = 1000
-# scrapper.interRequestWaitingTime = 0;
-scrapper.logFileName = os.path.basename(__file__)+'.log'
-
-scrapper.start(True)
+	scrapper.start(True)
 
 
 
