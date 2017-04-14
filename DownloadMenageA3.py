@@ -62,7 +62,7 @@ class WebcomicScrapper_MenageA3(WebcomicScrapper):
 				if imgFileName:
 					self.logDebug("imgFileName : ",str(imgFileName))
 					(imgFileName,tmp) = os.path.splitext(imgFileName)
-					imgDate = datetime.strptime( imgFileName[3:], '%Y%m%d' ).strftime('%Y-%m-%d')
+					imgDate = datetime.strptime( imgFileName[-8:], '%Y%m%d' ).strftime('%Y-%m-%d')
 		
 		if not imgSrcExtension:
 			self.logWarn('imgSrcExtension is incorrect')
