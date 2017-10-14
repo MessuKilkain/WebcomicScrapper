@@ -37,15 +37,19 @@ class WebcomicScrapper_IDontWantThisKindOfHero(WebcomicScrapper):
 				imgSrc = urllib.parse.urljoin(request.url,imgSrc)
 			self.logDebug( imgSrc, imgSrcExtension )
 		urlParsed = urllib.parse.urlparse(request.url)
-		if urlParsed and urlParsed.path:
-			self.logDebug(urlParsed,urlParsed.path)
-			(pathBeforePage,pageFileName) = os.path.split(urlParsed.path)
-			if pageFileName:
-				(imageNumber,tmpExtention) = os.path.splitext(pageFileName)
-				self.logDebug( 'imageNumber :', imageNumber )
-			if pathBeforePage :
-				(nothingImportant,chapterNumber) = os.path.split(pathBeforePage)
-				self.logDebug( 'chapterNumber :', chapterNumber )
+		urlScheme = None
+		if urlParsed:
+			if urlParsed.scheme:
+				urlScheme = urlParsed.scheme
+			if urlParsed.path:
+				self.logDebug(urlParsed,urlParsed.path)
+				(pathBeforePage,pageFileName) = os.path.split(urlParsed.path)
+				if pageFileName:
+					(imageNumber,tmpExtention) = os.path.splitext(pageFileName)
+					self.logDebug( 'imageNumber :', imageNumber )
+				if pathBeforePage :
+					(nothingImportant,chapterNumber) = os.path.split(pathBeforePage)
+					self.logDebug( 'chapterNumber :', chapterNumber )
 		if not imageNumber or not self.is_integer(imageNumber) :
 			self.logWarn('imageNumber is incorrect')
 		elif not chapterNumber:
@@ -82,6 +86,13 @@ class WebcomicScrapper_IDontWantThisKindOfHero(WebcomicScrapper):
 					nextUrlA = nextUrlArray[0]
 					if nextUrlA and nextUrlA['href']:
 						nextUrl = urllib.parse.urljoin(request.url,nextUrlA['href'])
+		
+		if nextUrl and urlScheme:
+			urlParsed = urllib.parse.urlparse(nextUrl)
+			if urlParsed:
+				if not urlParsed.scheme:
+					nextUrl = urlScheme + u':' + nextUrl
+				self.logDebug( 'nextUrl with scheme :', nextUrl )
 		return (nextUrl,imageFileName,imgSrc)
 
 if __name__ == '__main__':
