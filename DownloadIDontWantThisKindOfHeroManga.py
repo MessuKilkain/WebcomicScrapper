@@ -28,17 +28,27 @@ class WebcomicScrapper_IDontWantThisKindOfHero(WebcomicScrapper):
 			img = imgArray[0]
 			imgSrc = img['src']
 			if imgSrc:
-				imgSrcPath = imgSrc = urllib.parse.urlparse(imgSrc).path
+				imgSrcPath = urllib.parse.urlparse(imgSrc).path
 				(tmpImgSrcRoot,imgSrcExtension) = os.path.splitext(imgSrcPath)
 				if imgSrcExtension:
 					underscoreIndex = imgSrcExtension.find('_')
 					if underscoreIndex != -1:
 						imgSrcExtension = imgSrcExtension[:underscoreIndex]
-				imgSrc = urllib.parse.urljoin(request.url,imgSrc)
 			self.logDebug( imgSrc, imgSrcExtension )
 		urlParsed = urllib.parse.urlparse(request.url)
 		urlScheme = None
+		self.logDebug( u'urlParsed', urlParsed )
 		if urlParsed:
+			if imgSrc:
+				imgSrcParsed = urllib.parse.urlparse(imgSrc)
+				if imgSrcParsed:
+					self.logDebug( u'imgSrcParsed', imgSrcParsed )
+					if not imgSrcParsed.scheme:
+						imgSrcParsed.scheme = urlParsed.scheme
+					if not imgSrcParsed.netloc:
+						imgSrcParsed.netloc = urlParsed.netloc
+					imgSrc = urllib.parse.urlunparse(imgSrcParsed)
+					self.logDebug( u'New imgSrc', imgSrc )
 			if urlParsed.scheme:
 				urlScheme = urlParsed.scheme
 			if urlParsed.path:
