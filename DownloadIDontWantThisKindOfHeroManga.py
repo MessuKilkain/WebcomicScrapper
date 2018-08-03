@@ -57,6 +57,9 @@ class WebcomicScrapper_IDontWantThisKindOfHero(WebcomicScrapper):
 				if pageFileName:
 					(imageNumber,tmpExtention) = os.path.splitext(pageFileName)
 					self.logDebug( 'imageNumber :', imageNumber )
+				elif pageFileName == '':
+					imageNumber = '1'
+					self.logDebug( 'imageNumber :', imageNumber )
 				if pathBeforePage :
 					(nothingImportant,chapterNumber) = os.path.split(pathBeforePage)
 					self.logDebug( 'chapterNumber :', chapterNumber )
