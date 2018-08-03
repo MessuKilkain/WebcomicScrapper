@@ -72,30 +72,36 @@ class WebcomicScrapper_IDontWantThisKindOfHero(WebcomicScrapper):
 			imageFileName = os.path.join(self.imageFilesDestinationFolder,imageFileName)
 			self.logDebug( 'imageFileName :', imageFileName)
 		
-		pagesArray = soup.select('form#top_bar div.r.m div select.m option')
-		self.logDebug('pagesArray :',pagesArray)
+		pagesArray = soup.select('div.page_select select option')
+		# self.logDebug('pagesArray :',pagesArray)
 		if pagesArray and len(pagesArray) > 0 :
-			pagesArray.sort(key=lambda option: int(option['value']))
-			self.logDebug('pagesArray sorted :',pagesArray)
+			pagesArray = [x for x in pagesArray if self.is_integer(x.string)]
+			pagesArray.sort(key=lambda option: option.string)
+			# self.logDebug('pagesArray sorted :',pagesArray)
 			lastPageForChapterOption = pagesArray[len(pagesArray)-1]
-			if lastPageForChapterOption and lastPageForChapterOption['value'] :
-				lastPageForCurrentChapter = lastPageForChapterOption['value']
+			if lastPageForChapterOption and lastPageForChapterOption.string :
+				lastPageForCurrentChapter = lastPageForChapterOption.string
 				self.logDebug( 'lastPageForCurrentChapter :',lastPageForCurrentChapter )
 		# Get NextUrl
+		self.logDebug( 'imageNumber :',imageNumber )
 		if imageNumber and self.is_integer(imageNumber) and lastPageForCurrentChapter and self.is_integer(lastPageForCurrentChapter) :
-			if lastPageForCurrentChapter == imageNumber :
-				chapterNavigationDiv = soup.find('div',id='chnav')
-				if chapterNavigationDiv:
-					nextChapterSpanLabel = chapterNavigationDiv.find('span',string=re.compile('^Next.*'))
-					if nextChapterSpanLabel and nextChapterSpanLabel.parent and nextChapterSpanLabel.parent.a and nextChapterSpanLabel.parent.a['href'] :
-						nextUrl = nextChapterSpanLabel.parent.a['href']
-			else:
-				nextUrlArray = soup.select('#top_center_bar a.btn.next_page')
+			if int(lastPageForCurrentChapter) == int(imageNumber) :
+				nextUrlArray = soup.select('div.page_select select option')
+				nextUrlArray = [x for x in nextUrlArray if x.string == '01']
 				self.logDebug('nextUrlArray :',nextUrlArray)
 				if nextUrlArray and len(nextUrlArray) > 0 :
 					nextUrlA = nextUrlArray[0]
-					if nextUrlA and nextUrlA['href']:
-						nextUrl = urllib.parse.urljoin(request.url,nextUrlA['href'])
+					if nextUrlA and nextUrlA['value']:
+						nextUrl = urllib.parse.urljoin(request.url,nextUrlA['value'].replace(chapterNumber,u'c'+str(1+int(chapterNumber[1:]))))
+						nextUrl = urllib.parse.urljoin(nextUrl,u'1.html')
+			else:
+				nextUrlArray = soup.select('div.page_select select option')
+				nextUrlArray = [x for x in nextUrlArray if self.is_integer(x.string) and int(x.string) == 1+int(imageNumber)]
+				self.logDebug('nextUrlArray :',nextUrlArray)
+				if nextUrlArray and len(nextUrlArray) > 0 :
+					nextUrlA = nextUrlArray[0]
+					if nextUrlA and nextUrlA['value']:
+						nextUrl = urllib.parse.urljoin(request.url,nextUrlA['value'])
 		
 		if nextUrl and urlScheme:
 			urlParsed = urllib.parse.urlparse(nextUrl)
@@ -110,6 +116,7 @@ if __name__ == '__main__':
 	scrapper = WebcomicScrapper_IDontWantThisKindOfHero()
 
 	# scrapper.startComicUrl = 'http://mangafox.me/manga/i_don_t_want_this_kind_of_hero/c142/22.html'
+	# scrapper.startComicUrl = 'http://www.mangatown.com/manga/i_don_t_want_this_kind_of_hero/c200/31.html'
 	scrapper.pageCountLimit = 1000
 	scrapper.logFileName = os.path.basename(__file__)+'.log'
 
