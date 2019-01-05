@@ -45,9 +45,21 @@ class WebcomicScrapper_GoGetARoomie(WebcomicScrapper):
 			self.logDebug("fallbackDate.get_text() : ",str(fallbackDate.get_text()))
 			if fallbackDate and fallbackDate.get_text():
 				fallbackDateParts = fallbackDate.get_text().split()
+				self.logDebug("fallbackDateParts : ",str(fallbackDateParts))
 				if fallbackDateParts and len(fallbackDateParts) > 1:
-					#imgDate = '-'.join( fallbackDateParts[1].split('.') )
-					imgDate = datetime.strptime( fallbackDateParts[1], '%b.%d.%y' ).strftime('%Y-%m-%d')
+					if not imgDate:
+						try:
+							# imgDate = '-'.join( fallbackDateParts[1].split('.') )
+							imgDate = datetime.strptime( fallbackDateParts[1], '%b.%d.%y' ).strftime('%Y-%m-%d')
+						except Exception as e:
+							self.logDebug("e : ",str(e))
+							imgDate = None
+					if not imgDate:
+						try:
+							imgDate = datetime.strptime( fallbackDate.get_text(), 'Posted %B %d, %Y at %I:%M %p' ).strftime('%Y-%m-%d')
+						except Exception as e:
+							self.logDebug("e : ",str(e))
+							imgDate = None
 		
 		if not imgSrcExtension:
 			self.logWarn('imgSrcExtension is incorrect')
@@ -61,16 +73,24 @@ class WebcomicScrapper_GoGetARoomie(WebcomicScrapper):
 			imageFileName = os.path.join(self.imageFilesDestinationFolder,imageFileName)
 			self.logDebug(imageFileName)
 		
-		navNextArray = soup.select('#comicwrap .nav a.next')
-		self.logDebug('navNextArray :',navNextArray)
-		if navNextArray and len(navNextArray) > 0 :
-			aNavNext = navNextArray[0]
-			if aNavNext['href'] and aNavNext['href'] != '#':
-				nextUrl = urllib.parse.urljoin(request.url,aNavNext['href'])
+		if not nextUrl:
+			navNextArray = soup.select('#comicwrap .nav a.next')
+			self.logDebug('navNextArray :',navNextArray)
+			if navNextArray and len(navNextArray) > 0 :
+				aNavNext = navNextArray[0]
+				if aNavNext['href'] and aNavNext['href'] != '#':
+					nextUrl = urllib.parse.urljoin(request.url,aNavNext['href'])
+		if not nextUrl:
+			navNextArray = soup.select('#comicwrap .cc-nav a.cc-next')
+			self.logDebug('navNextArray :',navNextArray)
+			if navNextArray and len(navNextArray) > 0 :
+				aNavNext = navNextArray[0]
+				if aNavNext['href'] and aNavNext['href'] != '#':
+					nextUrl = urllib.parse.urljoin(request.url,aNavNext['href'])
 		return (nextUrl,imageFileName,imgSrc)
 		
 	def logDebug(self,*objects, end='\n'):
-		# self.print_FileAndSysout(*objects, end)
+		self.print_FileAndSysout(*objects, end)
 		return
 
 if __name__ == '__main__':

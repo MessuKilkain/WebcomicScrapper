@@ -54,6 +54,17 @@ class WebcomicScrapper_MenageA3(WebcomicScrapper):
 				self.logDebug("fallbackDate : ",str(fallbackDate))
 				self.logDebug("fallbackDate.get_text() : ",str(fallbackDate.get_text()))
 				imgDate = datetime.strptime( fallbackDate.get_text(), '%B %d, %Y' ).strftime('%Y-%m-%d')
+		#imgDate fallback
+		if not imgDate:
+			fallbackDate = soup.select_one('#iblog')
+			self.logDebug("fallbackDate : ",str(fallbackDate))
+			self.logDebug("fallbackDate.contents : ",str(fallbackDate.contents))
+			for child in fallbackDate.children:
+				child = child.string
+				self.logDebug("fallbackDate.child : ",str(child))
+				if child and child.startswith("Published on"):
+					imgDate = datetime.strptime( child, 'Published on : %B %d, %Y' ).strftime('%Y-%m-%d')
+					break
 		if not imgDate and imgSrc:
 			urlParsed = urllib.parse.urlparse(imgSrc)
 			if urlParsed and urlParsed.path:
@@ -86,7 +97,7 @@ class WebcomicScrapper_MenageA3(WebcomicScrapper):
 		return (nextUrl,imageFileName,imgSrc)
 		
 	def logDebug(self,*objects, end='\n'):
-		# self.print_FileAndSysout(*objects, end)
+		self.print_FileAndSysout(*objects, end)
 		return
 
 if __name__ == '__main__':

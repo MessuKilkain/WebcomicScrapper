@@ -18,6 +18,7 @@ class WebcomicScrapper(object):
 		self.imageFilesDestinationFolder = imageFilesDestinationFolder
 		self.logFileName = self.imageFilesDestinationFolder+'.log'
 		self.shelveFileName = self.imageFilesDestinationFolder+'.shelve'
+		self.scrapperName = self.imageFilesDestinationFolder
 		if startWithLastValidUrlWithNext and self.lastValidUrlWithNext:
 			self.startComicUrl = self.lastValidUrlWithNext
 		self.pageCountLimit = pageCountLimit
@@ -82,6 +83,23 @@ class WebcomicScrapper(object):
 			raise ValueError("shelveFileName is expected to be a string")
 		else:
 			self._shelveFileName = value
+		return
+	
+	@property
+	def configuration(self):
+		if not self._configuration or not isinstance(self._configuration, dict):
+			self._configuration = {}
+		return self._configuration
+	
+	@property
+	def scrapperName(self):
+		return self._scrapperName
+	@scrapperName.setter
+	def scrapperName(self,value):
+		if not isinstance(value, str):
+			raise ValueError("scrapperName is expected to be a string")
+		else:
+			self._scrapperName = value
 		return
 	
 	@property
@@ -199,7 +217,7 @@ class WebcomicScrapper(object):
 							imageRequest = requests.get(imgSrc)
 							if imageRequest.status_code != 200:
 								everythingWentWell = False
-								self.logWarn('\tImage request failed :',r)
+								self.logWarn('\tImage request failed :',imageRequest)
 							else:
 								with open(imageFileName, 'wb') as f:
 									f.write(imageRequest.content)
