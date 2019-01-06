@@ -72,9 +72,6 @@ class WebcomicScrapper_GamerCat(WebcomicScrapper):
 				self.logDebug( "No nextRelaviteUrl for aNavNext" )
 		return (nextUrl,imageFileName,imgSrc)
 		
-	def logDebug(self,*objects, end='\n'):
-		# self.print_FileAndSysout(*objects, end)
-		return
 
 if __name__ == '__main__':
 	# Start scrapping webcomic

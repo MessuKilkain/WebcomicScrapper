@@ -120,6 +120,7 @@ if __name__ == '__main__':
 
 	# scrapper.startComicUrl = 'http://mangafox.me/manga/i_don_t_want_this_kind_of_hero/c142/22.html'
 	# scrapper.startComicUrl = 'http://www.mangatown.com/manga/i_don_t_want_this_kind_of_hero/c200/31.html'
+	# scrapper.startComicUrl = 'https://www.webtoons.com/en/fantasy/i-dont-want-this-kind-of-hero/list?title_no=98'
 	scrapper.pageCountLimit = 1000
 	scrapper.logFileName = os.path.basename(__file__)+'.log'
 

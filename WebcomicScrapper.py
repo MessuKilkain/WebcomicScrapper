@@ -9,6 +9,8 @@ import urllib.parse
 import datetime
 import time
 import shelve
+import json
+import traceback
 
 class WebcomicScrapper(object):
 
@@ -17,7 +19,9 @@ class WebcomicScrapper(object):
 		self.startComicUrl = startComicUrl
 		self.imageFilesDestinationFolder = imageFilesDestinationFolder
 		self.logFileName = self.imageFilesDestinationFolder+'.log'
+		self.lastLogFileName = self.imageFilesDestinationFolder+'.last.log'
 		self.shelveFileName = self.imageFilesDestinationFolder+'.shelve'
+		self.jsonFileName = self.imageFilesDestinationFolder+'.json'
 		self.scrapperName = self.imageFilesDestinationFolder
 		if startWithLastValidUrlWithNext and self.lastValidUrlWithNext:
 			self.startComicUrl = self.lastValidUrlWithNext
@@ -73,6 +77,17 @@ class WebcomicScrapper(object):
 		else:
 			self._logFileName = value
 		return
+		
+	@property
+	def lastLogFileName(self):
+		return self._lastLogFileName
+	@lastLogFileName.setter
+	def lastLogFileName(self,value):
+		if not isinstance(value, str):
+			raise ValueError("lastLogFileName is expected to be a string")
+		else:
+			self._lastLogFileName = value
+		return
 	
 	@property
 	def shelveFileName(self):
@@ -83,6 +98,17 @@ class WebcomicScrapper(object):
 			raise ValueError("shelveFileName is expected to be a string")
 		else:
 			self._shelveFileName = value
+		return
+	
+	@property
+	def jsonFileName(self):
+		return self._jsonFileName
+	@jsonFileName.setter
+	def jsonFileName(self,value):
+		if not isinstance(value, str):
+			raise ValueError("jsonFileName is expected to be a string")
+		else:
+			self._jsonFileName = value
 		return
 	
 	@property
@@ -106,8 +132,18 @@ class WebcomicScrapper(object):
 	def lastValidUrlWithNext(self):
 		returnedValue = ''
 		try:
-			with shelve.open(self.shelveFileName, flag='r') as db:
-				returnedValue = db['lastValidUrlWithNext']
+			if not returnedValue:
+				with shelve.open(self.shelveFileName, flag='r') as db:
+					returnedValue = db['lastValidUrlWithNext']
+			if not returnedValue:
+				jsonConfig = dict()
+				try:
+					with open(self.jsonFileName, mode="r") as jsonFile:
+						jsonConfig = json.load(jsonFile)
+				except json.decoder.JSONDecodeError as e:
+					self.logWarn('JSON config file', self.jsonFileName, 'is not correct.')
+					raise e
+				returnedValue = jsonConfig['lastValidUrlWithNext']
 		finally:
 			return returnedValue
 	@lastValidUrlWithNext.setter
@@ -118,6 +154,19 @@ class WebcomicScrapper(object):
 			with shelve.open(self.shelveFileName) as db:
 				db['lastValidUrlWithNext'] = value
 				db.sync()
+			jsonConfig = dict()
+			try:
+				with open(self.jsonFileName, mode="r") as jsonFile:
+					jsonConfig = json.load(jsonFile)
+			except FileNotFoundError as e:
+				with open(self.jsonFileName, mode="w") as jsonFile:
+					json.dump(dict(), jsonFile)
+			except json.decoder.JSONDecodeError as e:
+				self.logWarn('JSON config file', self.jsonFileName, 'is not correct.')
+				raise e
+			jsonConfig['lastValidUrlWithNext'] = value
+			with open(self.jsonFileName, mode="w") as jsonFile:
+				json.dump(jsonConfig, jsonFile)
 		return
 	
 	@property
@@ -149,20 +198,26 @@ class WebcomicScrapper(object):
 		except ValueError:
 			return False
 
-	def print_FileAndSysout(self,*objects, end='\n'):
+	def print_FileAndSysout(self,*objects, end='\n', outputFileName=''):
 		print(*objects)
 		if __file__:
-			with open(self.logFileName, 'a') as f:
+			with open(outputFileName, 'a') as f:
 				print(*objects, file=f)
 		return
+	def logIntoLastLogFile(self,*objects):
+		with open(self.lastLogFileName, 'a') as f:
+			print(*objects, file=f)
 	def logInfo(self,*objects, end='\n'):
-		self.print_FileAndSysout(*objects, end)
+		self.print_FileAndSysout(*objects, end=end, outputFileName=self.logFileName)
+		self.logIntoLastLogFile(*objects)
 		return
 	def logWarn(self,*objects, end='\n'):
-		self.print_FileAndSysout(*objects, end)
+		self.print_FileAndSysout(*objects, end=end, outputFileName=self.logFileName)
+		self.logIntoLastLogFile(*objects)
 		return
 	def logDebug(self,*objects, end='\n'):
-		# self.print_FileAndSysout(*objects, end)
+		# self.print_FileAndSysout(*objects, end=end, outputFileName=self.logFileName)
+		self.logIntoLastLogFile(*objects)
 		return
 	
 	def cleanStringForFolderName(self,stringToClean):
@@ -177,7 +232,13 @@ class WebcomicScrapper(object):
 				temp += '_'
 		return temp
 
+	def resetLastLogFile(self):
+		with open(self.lastLogFileName, 'w') as f:
+			print('', file=f)
+		return
+	
 	def start(self, shouldPauseAtEnd=True):
+		self.resetLastLogFile()
 		self.logInfo("\nStar scrapping :",str(datetime.datetime.now()),'\n')
 		imagesFailuresUrls = []
 		
@@ -239,6 +300,7 @@ class WebcomicScrapper(object):
 			except Exception as e:
 				everythingWentWell = False
 				self.logWarn('Request Error :',str(e))
+				self.logDebug("traceback.format_exc() : ",traceback.format_exc())
 				# We stop the loop since we are not able to get a nextUrl
 				nextUrl = ''
 			finally:
