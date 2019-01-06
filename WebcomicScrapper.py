@@ -252,18 +252,38 @@ class WebcomicScrapper(object):
 					elif not imageFileName :
 						everythingWentWell = False
 						self.logWarn('imageFileName is incorrect')
+					elif not isinstance(imageFileName, str) and isinstance(imgSrc, str) :
+						everythingWentWell = False
+						self.logWarn('imageFileName is not a string but imgSrc is a string')
+					elif isinstance(imageFileName, str) and not isinstance(imgSrc, str) :
+						everythingWentWell = False
+						self.logWarn('imageFileName is a string but imgSrc is not a string')
 					else:
-						if os.path.isfile( imageFileName ):
-							self.logInfo('\tFile '+imageFileName+' already exists.')
-						else:
-							imageRequest = requests.get(imgSrc)
-							if imageRequest.status_code != 200:
-								everythingWentWell = False
-								self.logWarn('\tImage request failed :',imageRequest)
+						imageFileNameList = imageFileName
+						imgSrcList = imgSrc
+						self.logDebug('imageFileNameList', imageFileNameList)
+						self.logDebug('isinstance(imageFileNameList, str)', isinstance(imageFileNameList, str))
+						self.logDebug('imgSrcList', imgSrcList)
+						self.logDebug('isinstance(imgSrcList, str)', isinstance(imgSrcList, str))
+						if isinstance(imageFileNameList, str) and isinstance(imgSrcList, str) :
+							imageFileNameList = [imageFileNameList]
+							imgSrcList = [imgSrcList]
+						self.logDebug('imageFileNameList', imageFileNameList)
+						self.logDebug('isinstance(imageFileNameList, str)', isinstance(imageFileNameList, str))
+						self.logDebug('imgSrcList', imgSrcList)
+						self.logDebug('isinstance(imgSrcList, str)', isinstance(imgSrcList, str))
+						for imageFileName, imgSrc in zip(imageFileNameList, imgSrcList):
+							if os.path.isfile( imageFileName ):
+								self.logInfo('\tFile '+imageFileName+' already exists.')
 							else:
-								with open(imageFileName, 'wb') as f:
-									f.write(imageRequest.content)
-									self.logInfo('\tImage saved as '+imageFileName)
+								imageRequest = requests.get(imgSrc)
+								if imageRequest.status_code != 200:
+									everythingWentWell = False
+									self.logWarn('\tImage request failed :',imageRequest)
+								else:
+									with open(imageFileName, 'wb') as f:
+										f.write(imageRequest.content)
+										self.logInfo('\tImage saved as '+imageFileName)
 					
 					if currentUrl == nextUrl :
 						# We prevent the loop to stay on the same url
