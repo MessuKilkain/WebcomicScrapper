@@ -8,7 +8,6 @@ import requests
 import urllib.parse
 import datetime
 import time
-import shelve
 import json
 import traceback
 
@@ -20,7 +19,6 @@ class WebcomicScrapper(object):
 		self.imageFilesDestinationFolder = imageFilesDestinationFolder
 		self.logFileName = self.imageFilesDestinationFolder+'.log'
 		self.lastLogFileName = self.imageFilesDestinationFolder+'.last.log'
-		self.shelveFileName = self.imageFilesDestinationFolder+'.shelve'
 		self.jsonFileName = self.imageFilesDestinationFolder+'.json'
 		self.scrapperName = self.imageFilesDestinationFolder
 		if startWithLastValidUrlWithNext and self.lastValidUrlWithNext:
@@ -90,17 +88,6 @@ class WebcomicScrapper(object):
 		return
 	
 	@property
-	def shelveFileName(self):
-		return self._shelveFileName
-	@shelveFileName.setter
-	def shelveFileName(self,value):
-		if not isinstance(value, str):
-			raise ValueError("shelveFileName is expected to be a string")
-		else:
-			self._shelveFileName = value
-		return
-	
-	@property
 	def jsonFileName(self):
 		return self._jsonFileName
 	@jsonFileName.setter
@@ -133,9 +120,6 @@ class WebcomicScrapper(object):
 		returnedValue = ''
 		try:
 			if not returnedValue:
-				with shelve.open(self.shelveFileName, flag='r') as db:
-					returnedValue = db['lastValidUrlWithNext']
-			if not returnedValue:
 				jsonConfig = dict()
 				try:
 					with open(self.jsonFileName, mode="r") as jsonFile:
@@ -151,9 +135,6 @@ class WebcomicScrapper(object):
 		if not isinstance(value, str):
 			raise ValueError("lastValidUrlWithNext is expected to be a string")
 		else:
-			with shelve.open(self.shelveFileName) as db:
-				db['lastValidUrlWithNext'] = value
-				db.sync()
 			jsonConfig = dict()
 			try:
 				with open(self.jsonFileName, mode="r") as jsonFile:
