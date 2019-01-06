@@ -20,7 +20,7 @@ class WebcomicScrapper_WebToons(WebcomicScrapper):
 		imageNumber = ''
 		lastPageForCurrentChapter = ''
 		
-		chapterNumber = soup.select_one('#toolbar .paginate.v2 > span').string.replace('#','c')
+		chapterNumber = soup.select_one('#toolbar .paginate.v2 > span._btnOpenEpisodeList').string.replace('#','')
 		self.logDebug('chapterNumber :',chapterNumber)
 		
 		urlParsed = urllib.parse.urlparse(request.url)
@@ -65,7 +65,7 @@ class WebcomicScrapper_WebToons(WebcomicScrapper):
 				elif not imgSrcExtension:
 					self.logWarn('imgSrcExtension is incorrect')
 				else:
-					imageFileName = '%(chapter)s_-_%(number)03d%(ext)s' % {"chapter": chapterNumber, "number": int(imageNumber), 'ext': imgSrcExtension}
+					imageFileName = 'c%(chapter)03d_-_%(number)03d%(ext)s' % {"chapter": int(chapterNumber), "number": int(imageNumber), 'ext': imgSrcExtension}
 					imageFileName = self.cleanStringForFolderName( imageFileName )
 					imageFileName = os.path.join(self.imageFilesDestinationFolder,imageFileName)
 					self.logDebug( 'imageFileName :', imageFileName)

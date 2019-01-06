@@ -25,12 +25,24 @@ class WebcomicScrapper(object):
 			self.startComicUrl = self.lastValidUrlWithNext
 		self.pageCountLimit = pageCountLimit
 		self.interRequestWaitingTime = 1
+		self.interImageRequestWaitingTime = 0
 		self.numberOfFailureBeforeStop = -1
 
 	@property
 	def validCharsForFolderName(self):
 		"""List of characters accepted for folder name."""
 		return self._validCharsForFolderName
+	
+	@property
+	def interImageRequestWaitingTime(self):
+		return self._interImageRequestWaitingTime
+	@interImageRequestWaitingTime.setter
+	def interImageRequestWaitingTime(self,value):
+		if ( not isinstance(value, float) and not isinstance(value, int) ) or value < 0.0 :
+			raise ValueError("interImageRequestWaitingTime is expected to be a positive number (int or float)")
+		else:
+			self._interImageRequestWaitingTime = value
+		return
 	
 	@property
 	def interRequestWaitingTime(self):
@@ -272,11 +284,14 @@ class WebcomicScrapper(object):
 						self.logDebug('isinstance(imageFileNameList, str)', isinstance(imageFileNameList, str))
 						self.logDebug('imgSrcList', imgSrcList)
 						self.logDebug('isinstance(imgSrcList, str)', isinstance(imgSrcList, str))
+						firstImageRequest = True
 						for imageFileName, imgSrc in zip(imageFileNameList, imgSrcList):
+							if self.interImageRequestWaitingTime > 0 and not firstImageRequest:
+								time.sleep(self.interImageRequestWaitingTime)
 							if os.path.isfile( imageFileName ):
 								self.logInfo('\tFile '+imageFileName+' already exists.')
 							else:
-								imageRequest = requests.get(imgSrc)
+								imageRequest = requests.get(imgSrc, headers={"Referer": currentUrl})
 								if imageRequest.status_code != 200:
 									everythingWentWell = False
 									self.logWarn('\tImage request failed :',imageRequest)
@@ -284,6 +299,7 @@ class WebcomicScrapper(object):
 									with open(imageFileName, 'wb') as f:
 										f.write(imageRequest.content)
 										self.logInfo('\tImage saved as '+imageFileName)
+							firstImageRequest = False
 					
 					if currentUrl == nextUrl :
 						# We prevent the loop to stay on the same url
